@@ -29,6 +29,15 @@
   --m1:#2ecc8a;--m2:#f26522;--m3:#4a9eff;
   --text:#d0d0d0;--dim:#5a5a5a;--bright:#ffffff;
 }
+[data-theme="light"]{
+  --bg:#f5f6f8;--s1:#ffffff;--s2:#f0f1f4;--border:#d8dbe0;
+  --text:#1a1a1a;--dim:#6b7280;--accent:#F26522;--accent-d:#d4571a;
+}
+[data-theme="light"] body{background:linear-gradient(180deg,#f5f6f8 0%, #e8eaef 100%);}
+[data-theme="light"] .card{box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+[data-theme="light"] .tank-body{background:#e8eaef;border-color:#cbd1d8;}
+[data-theme="light"] .h-info,
+[data-theme="light"] .home-btn{background:#fff;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
 /* Acento MVC sutil en el fondo */
@@ -498,8 +507,9 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
 .tank-fill.gasolina{background:linear-gradient(180deg,rgba(245,197,24,.85),rgba(200,160,15,.95));}
 .tank-fill.gas     {background:linear-gradient(180deg,rgba(74,158,255,.8),rgba(30,100,200,.9));}
 .tank-fill.kerosene{background:linear-gradient(180deg,rgba(176,108,212,.8),rgba(120,60,160,.9));}
-.tank-fill.warn    {background:linear-gradient(180deg,rgba(242,101,34,.9),rgba(192,77,16,1));}
-.tank-fill.critical{background:linear-gradient(180deg,rgba(232,53,74,.9),rgba(180,20,40,1));}
+/* warn y critical NO afectan a gasolina (mantiene amarillo siempre) */
+.tank-fill.warn:not(.gasolina)    {background:linear-gradient(180deg,rgba(242,101,34,.9),rgba(192,77,16,1));}
+.tank-fill.critical:not(.gasolina){background:linear-gradient(180deg,rgba(232,53,74,.9),rgba(180,20,40,1));}
 .tank-val{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:900;
   color:white;text-shadow:0 1px 3px rgba(0,0,0,.8);white-space:nowrap;text-align:center;}
@@ -866,6 +876,7 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
 
       <button class="h-btn" id="btn-install" onclick="installApp()" style="display:none;background:var(--accent);color:#ffffff;border-color:var(--accent);font-weight:700;">⬇ Instalar</button>
       <button class="h-btn" onclick="volverHome()" title="Volver al inicio">🏠</button>
+      <button class="h-btn" onclick="toggleTheme()" id="btn-theme" title="Cambiar tema">🌙</button>
       <button class="h-btn exit" onclick="doLogout()">Salir</button>
     </div>
   </header>
@@ -1501,6 +1512,65 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
         ℹ Tip: Tab/Enter para moverse entre celdas. Las filas vacías se omiten al guardar.
       </div>
     </div>
+
+    <!-- ADJUNTAR FOTOS A REGISTROS EXISTENTES -->
+    <div class="card" style="margin-top:14px;border-color:var(--red);background:rgba(232,53,74,.03);">
+      <div class="ct" style="color:var(--red);">📷 Adjuntar Fotos a Registros Históricos
+        <span style="font-size:10px;color:var(--dim);font-weight:400;margin-left:6px;font-family:Barlow,sans-serif;">solo administradores</span>
+      </div>
+      <p style="font-size:12px;color:var(--dim);margin-top:4px;line-height:1.5;">
+        Permite agregar fotografías a mediciones o descargas que ya están en Google Sheets.
+        Útil para completar registros históricos que fueron cargados sin fotos.
+      </p>
+
+      <div class="fg2" style="grid-template-columns:1fr 1fr 1fr;margin-top:10px;">
+        <div class="fg">
+          <label>Fecha del registro<span class="req">*</span></label>
+          <input type="date" id="adj-fecha">
+        </div>
+        <div class="fg">
+          <label>Módulo<span class="req">*</span></label>
+          <select id="adj-modulo" onchange="adjCambiarModulo()">
+            <option value="isla">🏭 Isla Planta Alta</option>
+            <option value="horno">🔥 Horno Planta Baja</option>
+            <option value="reactivos">⚗️ Reactivos Planta Alta</option>
+            <option value="carga">⛽ Descarga de Combustible</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Turno (si aplica)</label>
+          <select id="adj-turno">
+            <option value="M">🌅 Mañana</option>
+            <option value="T">☀️ Tarde</option>
+            <option value="N">🌙 Noche</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Selector de tipo de foto -->
+      <div class="fg" style="margin-top:8px;">
+        <label>Tipo de fotografía a adjuntar<span class="req">*</span></label>
+        <select id="adj-tipo-foto"></select>
+      </div>
+
+      <!-- Botón seleccionar foto -->
+      <div style="margin-top:10px;">
+        <div class="pi"><div class="pl">Foto a subir</div>
+          <div class="pc" id="adj-foto-cont">
+            <input type="file" accept="image/*" capture="environment" id="adj-foto-input" onchange="adjCapturarFoto(this)">
+            <div class="pico">📷</div>
+            <div class="phi">Tocar para seleccionar</div>
+            <button class="prm" onclick="adjRemoveFoto(event)" style="display:none;" id="adj-foto-rm">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-sub" onclick="adjSubirFoto()" style="margin-top:12px;background:var(--red);">
+        📤 Adjuntar Foto al Registro
+      </button>
+
+      <div id="adj-resultado" style="margin-top:10px;font-size:12px;"></div>
+    </div>
   </div>
 
   <!-- USUARIOS — GESTIÓN ─────────────────────────────────── -->
@@ -1799,7 +1869,7 @@ let pendingQueue=[];
 // Pega aquí la URL pública de tu implementación (Deploy → Web app)
 // que termina en /exec
 // ═══════════════════════════════════════════════════════════════
-const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxOclk6ue4oS6xmEZU63sbNgfqnOEQcHzusRMa5zVo1l17hiHlghRQ2sFh5pTPXTULPew/exec';
+const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycby_REEMPLAZAR_CON_TU_URL/exec';
 
 let SCRIPT_URL = SCRIPT_URL_DEFAULT;
 const ML={M:'Mañana',T:'Tarde',N:'Noche'}, MI={M:'🌅',T:'☀️',N:'🌙'};
@@ -2008,55 +2078,23 @@ async function doLogin(){
     else usuariosCombinados.push(s);
   });
 
-  // 3. Refrescar desde Sheets — múltiples intentos
+  // 3. Refrescar desde Sheets — intentar múltiples métodos
   var errorMsg = null;
-  var usuariosSheets = null;
   if(urlOk){
     loadingUpdate('Consultando servidor...', 'Cargando usuarios');
-    // Agregar timestamp para forzar bypass de caché
-    var url = SCRIPT_URL + '?action=getUsuarios&_=' + Date.now();
-    try{
-      var resp = await fetch(url, { method: 'GET', redirect: 'follow', cache: 'no-store' });
-      console.log('[Login] Status:', resp.status, 'URL final:', resp.url);
-      var txt = await resp.text();
-      console.log('[Login] Respuesta (300 chars):', txt.slice(0, 300));
-
-      // Intentar parsear JSON — manejar respuestas con caracteres extra
-      var json = null;
-      try {
-        json = JSON.parse(txt);
-      } catch(parseErr){
-        // Buscar JSON dentro del texto (a veces Google envuelve la respuesta)
-        var match = txt.match(/\{[\s\S]*"data"[\s\S]*\}/);
-        if(match){
-          try { json = JSON.parse(match[0]); }
-          catch(e2){ console.warn('[Login] No se pudo extraer JSON:', e2); }
-        }
-        if(!json) throw new Error('Respuesta no es JSON válido. Inicio: '+txt.slice(0,80));
-      }
-
-      console.log('[Login] JSON parseado:', json);
-
-      if(json && json.ok && Array.isArray(json.data) && json.data.length > 0){
-        usuariosSheets = json.data;
-        localStorage.setItem('mvc_users_sheets', JSON.stringify(json.data));
-        // Reemplazar lista combinada con datos frescos
-        usuariosCombinados = USERS.slice();
-        json.data.forEach(function(s){
-          var idx = usuariosCombinados.findIndex(function(x){ return x.usuario===s.usuario; });
-          if(idx > -1) usuariosCombinados[idx] = s;
-          else usuariosCombinados.push(s);
-        });
-        console.log('[Login] ✓ Usuarios obtenidos:', json.data.length,
-          json.data.map(function(x){return x.usuario+'('+x.role+')';}).join(', '));
-      } else if(json && json.ok === false){
-        errorMsg = 'Servidor: ' + (json.error || 'sin detalle');
-      } else {
-        errorMsg = 'Respuesta sin usuarios válidos';
-      }
-    } catch(e){
-      errorMsg = 'Sin conexión al servidor: ' + e.message;
-      console.warn('[Login] Error fetch:', e);
+    var json = await consultarUsuariosRobusto();
+    if(json && json.ok && Array.isArray(json.data) && json.data.length > 0){
+      localStorage.setItem('mvc_users_sheets', JSON.stringify(json.data));
+      usuariosCombinados = USERS.slice();
+      json.data.forEach(function(s){
+        var idx = usuariosCombinados.findIndex(function(x){ return x.usuario===s.usuario; });
+        if(idx > -1) usuariosCombinados[idx] = s;
+        else usuariosCombinados.push(s);
+      });
+      console.log('[Login] ✓ Usuarios obtenidos:', json.data.length,
+        json.data.map(function(x){return x.usuario+'('+x.role+')';}).join(', '));
+    } else {
+      errorMsg = (json && json.error) ? json.error : 'No se pudo obtener usuarios del servidor';
     }
   } else {
     errorMsg = 'URL del servidor no configurada';
@@ -2402,7 +2440,7 @@ function goPage(id,tab){
   document.getElementById('page-'+id).classList.add('active');
   tab.classList.add('active');
   if(id==='dashboard') loadDashboard();
-  if(id==='admin') admInit();
+  if(id==='admin'){ admInit(); adjInit(); }
   if(id==='usuarios') cargarUsuariosDeSheets();
 }
 
@@ -4097,7 +4135,9 @@ async function generarPDF(){
       });
     });
 
-    console.log('PDF Bloque 3: fotos totales', totalFotos);
+    console.log('PDF Bloque 3: fotos sectores=', allFotos);
+    console.log('PDF Bloque 3: dashCargasDia=', window.dashCargasDia);
+    console.log('PDF Bloque 3: fotos totales contadas=', totalFotos);
 
     if(totalFotos === 0){
       mensajeSinDatos('No existen datos fotográficos');
@@ -5105,6 +5145,237 @@ async function eliminarUsuario(usuario){
     showToast('⚠ Error al eliminar','warn');
   }
 }
+
+// ═══════════════ FETCH ROBUSTO DE USUARIOS ═══════════════
+// Apps Script /exec hace redirect 302 a googleusercontent.com.
+// Algunos navegadores móviles (Chrome Android, WebView) fallan ese redirect en CORS.
+// Solución: usar varios métodos en cascada hasta que uno funcione.
+async function consultarUsuariosRobusto(){
+  var url = SCRIPT_URL + '?action=getUsuarios&_=' + Date.now();
+
+  // Método 1: fetch normal
+  try {
+    console.log('[Fetch-1] Intentando fetch normal a', url);
+    var resp = await fetch(url, { method:'GET', cache:'no-store', redirect:'follow' });
+    console.log('[Fetch-1] Status', resp.status, 'URL final:', resp.url, 'type:', resp.type);
+    if(resp.ok){
+      var txt = await resp.text();
+      console.log('[Fetch-1] Body (200 chars):', txt.slice(0,200));
+      var parsed = intentarParsearJSON(txt);
+      if(parsed) return parsed;
+    }
+  } catch(e){
+    console.warn('[Fetch-1] falló:', e.message);
+  }
+
+  // Método 2: fetch sin redirect (capturar la respuesta original)
+  try {
+    console.log('[Fetch-2] Intentando con no-cors (opaque)');
+    // no-cors no permite leer body pero al menos verifica la conexión
+    // Por eso pasamos a Método 3 directamente si Método 1 falló
+  } catch(e){}
+
+  // Método 3: JSONP — inyectar <script> con callback
+  // No tiene problemas de CORS porque no es fetch
+  try {
+    console.log('[Fetch-3] Intentando JSONP');
+    var result = await new Promise(function(resolve, reject){
+      var callbackName = 'mvcUserCb_' + Date.now();
+      var timeoutId = setTimeout(function(){
+        delete window[callbackName];
+        if(script.parentNode) script.parentNode.removeChild(script);
+        reject(new Error('JSONP timeout'));
+      }, 12000);
+      window[callbackName] = function(data){
+        clearTimeout(timeoutId);
+        delete window[callbackName];
+        if(script.parentNode) script.parentNode.removeChild(script);
+        resolve(data);
+      };
+      var script = document.createElement('script');
+      script.src = SCRIPT_URL + '?action=getUsuarios&callback=' + callbackName + '&_=' + Date.now();
+      script.onerror = function(){
+        clearTimeout(timeoutId);
+        delete window[callbackName];
+        if(script.parentNode) script.parentNode.removeChild(script);
+        reject(new Error('JSONP load error'));
+      };
+      document.head.appendChild(script);
+    });
+    console.log('[Fetch-3] JSONP OK:', result);
+    if(result && result.ok && Array.isArray(result.data)) return result;
+  } catch(e){
+    console.warn('[Fetch-3] JSONP falló:', e.message);
+  }
+
+  return { ok: false, error: 'No se pudo conectar al servidor (todos los métodos fallaron)' };
+}
+
+function intentarParsearJSON(txt){
+  if(!txt) return null;
+  try { return JSON.parse(txt); } catch(e){}
+  // Buscar JSON dentro del texto
+  var match = txt.match(/\{[\s\S]*"ok"[\s\S]*"data"[\s\S]*\}/);
+  if(match){
+    try { return JSON.parse(match[0]); } catch(e){}
+  }
+  return null;
+}
+
+// ═══════════════ ADJUNTAR FOTOS A REGISTROS HISTÓRICOS ═══════════════
+var ADJ_TIPOS_FOTOS = {
+  'isla':      [
+    {id:'foto_sector',       lbl:'Foto del Sector'},
+    {id:'foto_surtidor',     lbl:'Surtidor'},
+    {id:'foto_orpak',        lbl:'ORPAK'},
+    {id:'foto_cnt_diesel',   lbl:'Contador Diesel'},
+    {id:'foto_cnt_gasolina', lbl:'Contador Gasolina'},
+    {id:'foto_reloj_gas',    lbl:'Reloj Gas Licuado'},
+    {id:'foto_med_diesel',   lbl:'Medición Diesel'},
+    {id:'foto_med_gasolina', lbl:'Medición Gasolina'}
+  ],
+  'horno':     [
+    {id:'foto_sector',        lbl:'Foto del Sector'},
+    {id:'foto_surt_diesel',   lbl:'Surtidor Diesel'},
+    {id:'foto_surt_gasolina', lbl:'Surtidor Gasolina'},
+    {id:'foto_orpak',         lbl:'ORPAK'},
+    {id:'foto_med_diesel',    lbl:'Medición Diesel'},
+    {id:'foto_med_kerosene',  lbl:'Medición Kerosene'}
+  ],
+  'reactivos': [
+    {id:'foto_med_diesel', lbl:'Medición Diesel'}
+  ],
+  'carga':     [
+    {id:'foto_guia',          lbl:'Guía de despacho'},
+    {id:'foto_sello_antes',   lbl:'Sello antes'},
+    {id:'foto_sello_despues', lbl:'Sello después'},
+    {id:'foto_est_antes',     lbl:'Nivel estanque antes'},
+    {id:'foto_cnt_antes',     lbl:'Contador antes'},
+    {id:'foto_est_despues',   lbl:'Nivel estanque después'},
+    {id:'foto_cnt_despues',   lbl:'Contador después'}
+  ]
+};
+var ADJ_FOTO_DATA = null;
+
+function adjCambiarModulo(){
+  var mod = document.getElementById('adj-modulo').value;
+  var sel = document.getElementById('adj-tipo-foto');
+  var tipos = ADJ_TIPOS_FOTOS[mod] || [];
+  sel.innerHTML = tipos.map(function(t){
+    return '<option value="'+t.id+'">'+t.lbl+'</option>';
+  }).join('');
+  // Ocultar selector de turno si es carga
+  var wrap = document.getElementById('adj-turno').parentElement;
+  if(wrap) wrap.style.display = (mod==='carga') ? 'none' : '';
+}
+
+async function adjCapturarFoto(input){
+  if(!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  // Comprimir como en submitMed
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var img = new Image();
+    img.onload = function(){
+      var canvas = document.createElement('canvas');
+      var w = img.width, h = img.height;
+      var maxW = 800;
+      if(w > maxW){ h = h * (maxW / w); w = maxW; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      ADJ_FOTO_DATA = canvas.toDataURL('image/jpeg', 0.4);
+      var cont = document.getElementById('adj-foto-cont');
+      cont.style.background = "url('"+ADJ_FOTO_DATA+"') center/cover";
+      cont.classList.add('has');
+      document.getElementById('adj-foto-rm').style.display = 'block';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function adjRemoveFoto(e){
+  e.stopPropagation();
+  ADJ_FOTO_DATA = null;
+  var cont = document.getElementById('adj-foto-cont');
+  cont.style.background = '';
+  cont.classList.remove('has');
+  document.getElementById('adj-foto-input').value = '';
+  document.getElementById('adj-foto-rm').style.display = 'none';
+}
+
+async function adjSubirFoto(){
+  var fecha  = document.getElementById('adj-fecha').value;
+  var modulo = document.getElementById('adj-modulo').value;
+  var turno  = document.getElementById('adj-turno').value;
+  var tipo   = document.getElementById('adj-tipo-foto').value;
+  var res    = document.getElementById('adj-resultado');
+  res.innerHTML = '';
+
+  if(!fecha || !modulo || !tipo){
+    res.innerHTML = '<span style="color:var(--red)">⚠ Completa fecha, módulo y tipo de foto</span>';
+    return;
+  }
+  if(!ADJ_FOTO_DATA){
+    res.innerHTML = '<span style="color:var(--red)">⚠ Debes seleccionar una foto</span>';
+    return;
+  }
+  if(!SCRIPT_URL || SCRIPT_URL.indexOf('REEMPLAZAR') > -1){
+    res.innerHTML = '<span style="color:var(--red)">⚠ Configura la URL del Apps Script</span>';
+    return;
+  }
+
+  loadingShow('Subiendo foto', 'Cargando al servidor...', tipo);
+  try {
+    var resp = await fetch(SCRIPT_URL, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action:    'adjuntarFotoHistorica',
+        fecha:     fecha,
+        modulo:    modulo,
+        turno:     turno || 'M',
+        tipo:      tipo,
+        foto_data: ADJ_FOTO_DATA,
+        usuario:   CU ? CU.name : 'admin'
+      })
+    });
+    loadingHide();
+    res.innerHTML = '<span style="color:var(--green)">✔ Foto enviada al servidor. Verifica en Google Sheets que se haya guardado correctamente.</span>';
+    showToast('✔ Foto adjuntada al registro');
+    // Limpiar form
+    adjRemoveFoto({stopPropagation:function(){}});
+  } catch(e){
+    loadingHide();
+    res.innerHTML = '<span style="color:var(--red)">⚠ Error: '+e.message+'</span>';
+  }
+}
+
+// Inicializar al cargar la pestaña admin
+function adjInit(){
+  var hoy = todayISO();
+  var elFecha = document.getElementById('adj-fecha');
+  if(elFecha && !elFecha.value) elFecha.value = hoy;
+  adjCambiarModulo();
+}
+
+// ═══════════════ TEMA OSCURO / CLARO ═══════════════
+function aplicarTema(tema){
+  document.documentElement.setAttribute('data-theme', tema);
+  localStorage.setItem('mvc_theme', tema);
+  var btn = document.getElementById('btn-theme');
+  if(btn) btn.textContent = (tema === 'light') ? '☀️' : '🌙';
+}
+function toggleTheme(){
+  var actual = document.documentElement.getAttribute('data-theme') || 'dark';
+  aplicarTema(actual === 'dark' ? 'light' : 'dark');
+}
+(function initTheme(){
+  var saved = localStorage.getItem('mvc_theme') || 'dark';
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ aplicarTema(saved); });
+  } else { aplicarTema(saved); }
+})();
 
 // ═══════════════ LOADING OVERLAY ═══════════════
 function loadingShow(titulo, mensaje, detalle){
