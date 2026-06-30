@@ -1869,7 +1869,7 @@ let pendingQueue=[];
 // Pega aquí la URL pública de tu implementación (Deploy → Web app)
 // que termina en /exec
 // ═══════════════════════════════════════════════════════════════
-const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbwUD3tz26vNUd7B16BePGYevyq3_iO4m7Tc0C_aRjPBn3AqrZPdvhPId9pKoSle6ttSog/exec';
+const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycby_REEMPLAZAR_CON_TU_URL/exec';
 
 let SCRIPT_URL = SCRIPT_URL_DEFAULT;
 const ML={M:'Mañana',T:'Tarde',N:'Noche'}, MI={M:'🌅',T:'☀️',N:'🌙'};
@@ -2879,23 +2879,59 @@ function dashIrHoy(){
   loadDashboard();
 }
 
+// Contador global para invalidar peticiones obsoletas del dashboard
+var __dashReqId = 0;
+
 async function loadDashboard(){
+  // Generar un ID único para esta petición y guardarlo como "última válida"
+  var myReqId = ++__dashReqId;
+
   window.dashAllFotos = {};
   var fecha = dashGetFecha();
   var btn   = document.getElementById('btn-dash-refresh');
   var sta   = document.getElementById('dash-status');
   if(btn) btn.classList.add('loading');
   dashSetFecha(fecha);
-  // Cargar también el análisis mensual de la misma fecha
+  // Cargar también el análisis mensual (también con sistema de versión propio)
   loadAnalisisMensual();
+
+  // Limpiar dashboard mientras carga (evita ver datos de la fecha anterior)
+  limpiarDashboard();
 
   if(SCRIPT_URL){
     if(sta){ sta.style.display='block'; sta.className='dash-status loading';
       sta.textContent='⟳ Cargando datos '+formatFecha(fecha)+'...'; }
     try{
-      var resp = await fetch(SCRIPT_URL + '?action=getDashboard&fecha='+fecha);
-      var json = await resp.json();
+      var url = SCRIPT_URL + '?action=getDashboard&fecha='+fecha;
+      var resp = await fetch(url, { cache: 'no-store' });
+
+      // ⚠ Verificar si esta petición sigue siendo la más reciente
+      if(myReqId !== __dashReqId){
+        console.log('[Dashboard] Respuesta obsoleta descartada (era para '+fecha+', pero ya hay otra petición en curso)');
+        return;
+      }
+
+      var txt = await resp.text();
+      // Verificar nuevamente después del await del texto
+      if(myReqId !== __dashReqId){
+        console.log('[Dashboard] Respuesta obsoleta descartada después de leer texto');
+        return;
+      }
+
+      if(txt.trim().toLowerCase().startsWith('<!doctype') || txt.trim().startsWith('<html')){
+        throw new Error('El servidor devolvió HTML en lugar de JSON.');
+      }
+      var json;
+      try { json = JSON.parse(txt); }
+      catch(parseErr){ throw new Error('Respuesta no es JSON válido. Primeros 80 chars: '+txt.slice(0,80)); }
+
       if(json.ok && json.data){
+        // Solo aplicar si seguimos en la fecha solicitada y es la petición más reciente
+        if(myReqId !== __dashReqId) return;
+        if(dashGetFecha() !== fecha){
+          console.log('[Dashboard] La fecha cambió mientras esperaba — descartando datos de '+fecha);
+          return;
+        }
         var enriched = enriquecerConCargas(json.data);
         renderTanks(enriched);
         var esHoy = fecha === todayISO();
@@ -2905,8 +2941,10 @@ async function loadDashboard(){
         throw new Error(json.error||'Sin datos para esta fecha');
       }
     } catch(e){
+      if(myReqId !== __dashReqId) return; // descartar errores obsoletos también
+      console.error('[Dashboard] Error:', e);
       if(sta){ sta.className='dash-status err';
-        sta.textContent='⚠ '+e.message+' — mostrando datos locales'; }
+        sta.innerHTML='⚠ '+e.message+'<br><span style="font-size:10px;opacity:.7;">URL: '+SCRIPT_URL.slice(0, 60)+'...</span>'; }
       renderTanksLocal(fecha);
     }
   } else {
@@ -2914,7 +2952,35 @@ async function loadDashboard(){
       sta.textContent='📱 Datos locales para '+formatFecha(fecha); }
     renderTanksLocal(fecha);
   }
-  if(btn) btn.classList.remove('loading');
+  if(myReqId === __dashReqId && btn) btn.classList.remove('loading');
+}
+
+// Limpia los estanques visualmente al cambiar de fecha (evita mostrar datos viejos)
+function limpiarDashboard(){
+  var keys = ['isla-diesel','isla-gasolina','isla-gas',
+              'horno-diesel','horno-kero','horno-gas',
+              'react-diesel'];
+  keys.forEach(function(k){
+    var fill = document.getElementById('tf-'+k);
+    var val  = document.getElementById('tv-'+k);
+    var body = document.getElementById('tb-'+k);
+    if(fill) fill.style.height = '0%';
+    if(val)  val.textContent  = '—';
+    if(body){
+      body.classList.remove('has-descarga');
+      delete body.dataset.descarga;
+    }
+  });
+  // Limpiar consumos
+  ['consumo-isla','consumo-horno','consumo-react'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.innerHTML = '<div style="color:var(--dim);font-size:11px;font-style:italic;padding:8px;">Cargando...</div>';
+  });
+  // Limpiar ops
+  ['ops-isla','ops-horno'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.innerHTML = '';
+  });
 }
 
 // ─── Normalizar cualquier valor de fecha a YYYY-MM-DD ────────
@@ -3873,15 +3939,11 @@ async function generarPDF(){
         var el = document.getElementById('tv-'+e.key);
         var nivelTxt = el ? el.textContent.trim() : '—';
 
-        // Descarga del día (leer del tank-cap si tiene data-original modificado)
+        // Descarga del día — leer del dataset del tank-body (donde la guarda setTank)
         var bodyEl = document.getElementById('tb-'+e.key);
-        var wrap   = bodyEl ? bodyEl.parentElement : null;
-        var capEl  = wrap ? wrap.querySelector('.tank-cap') : null;
         var descargaTxt = '';
-        if(capEl && capEl.classList.contains('has-descarga')){
-          // Extraer "⬇ X.XXX lts" del texto del cap
-          var m2 = capEl.textContent.match(/⬇\s*([\d.,]+)\s*lts/);
-          if(m2) descargaTxt = m2[1] + ' lts';
+        if(bodyEl && bodyEl.classList.contains('has-descarga') && bodyEl.dataset.descarga){
+          descargaTxt = bodyEl.dataset.descarga;
         }
 
         if (nivelTxt && nivelTxt !== '—' && nivelTxt !== '') hayDatos = true;
@@ -4704,7 +4766,9 @@ function admGuardarTodo(){
 // ═══════════════ ANÁLISIS MENSUAL ═══════════════
 var dashChart = null;
 
+var __analisisReqId = 0;
 async function loadAnalisisMensual(){
+  var myReqId = ++__analisisReqId;
   inicializarSelectorMeses();
 
   var combust = document.getElementById('dash-combust-sel').value || 'diesel-isla';
@@ -4731,9 +4795,10 @@ async function loadAnalisisMensual(){
     var url  = SCRIPT_URL + '?action=getAnalisisMensual&mes='+encodeURIComponent(mes)+'&combustible='+encodeURIComponent(combust);
     console.log('[Análisis] Fetch:', url);
     var resp = await fetch(url);
+    if(myReqId !== __analisisReqId){ console.log('[Análisis] Petición obsoleta descartada'); return; }
     if(!resp.ok) throw new Error('HTTP '+resp.status);
     var txt = await resp.text();
-    console.log('[Análisis] Respuesta:', txt.slice(0, 200)+'...');
+    if(myReqId !== __analisisReqId){ console.log('[Análisis] Petición obsoleta tras texto'); return; }
     var json = JSON.parse(txt);
     if(json.ok && json.data){
       console.log('[Análisis] OK datos:', json.data);
