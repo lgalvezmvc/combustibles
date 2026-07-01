@@ -4973,9 +4973,9 @@ function diasDelMes(mes){
 // Plugin propio para mostrar valores arriba de cada barra
 // Límites de sobre-consumo diario por sector
 function obtenerLimiteConsumo(combust){
-  // Diesel Horno: 5.000 lts, Diesel Reactivos: 2.000 lts
+  // Diesel Horno: 5.000 lts, Diesel Reactivos: 2.500 lts
   if(combust === 'diesel-horno')     return 5000;
-  if(combust === 'diesel-reactivos') return 2000;
+  if(combust === 'diesel-reactivos') return 2500;
   return 0; // sin límite definido
 }
 
@@ -5480,6 +5480,20 @@ function aplicarTema(tema){
   localStorage.setItem('mvc_theme', tema);
   var btn = document.getElementById('btn-theme');
   if(btn) btn.textContent = (tema === 'light') ? '☀️' : '🌙';
+  // Redibujar el gráfico del análisis mensual si existe
+  // (para que actualice el color de los números y ejes)
+  if(typeof dashChart !== 'undefined' && dashChart){
+    // Actualizar colores de ejes según tema
+    var esClaro = (tema === 'light');
+    var colorEjes  = esClaro ? '#0a0e1a' : '#aaa';
+    var colorGrid  = esClaro ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.05)';
+    dashChart.options.scales.x.ticks.color = colorEjes;
+    dashChart.options.scales.y.ticks.color = colorEjes;
+    if(dashChart.options.scales.x.title) dashChart.options.scales.x.title.color = colorEjes;
+    if(dashChart.options.scales.y.title) dashChart.options.scales.y.title.color = colorEjes;
+    dashChart.options.scales.y.grid.color = colorGrid;
+    dashChart.update('none');
+  }
 }
 function toggleTheme(){
   var actual = document.documentElement.getAttribute('data-theme') || 'dark';
