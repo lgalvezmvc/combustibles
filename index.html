@@ -4973,9 +4973,9 @@ function diasDelMes(mes){
 // Plugin propio para mostrar valores arriba de cada barra
 // Límites de sobre-consumo diario por sector
 function obtenerLimiteConsumo(combust){
-  // Diesel Horno: 5.000 lts, Diesel Reactivos: 2.500 lts
+  // Diesel Horno: 5.000 lts, Diesel Reactivos: 2.000 lts
   if(combust === 'diesel-horno')     return 5000;
-  if(combust === 'diesel-reactivos') return 2500;
+  if(combust === 'diesel-reactivos') return 2000;
   return 0; // sin límite definido
 }
 
