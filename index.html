@@ -30,14 +30,54 @@
   --text:#d0d0d0;--dim:#5a5a5a;--bright:#ffffff;
 }
 [data-theme="light"]{
-  --bg:#f5f6f8;--s1:#ffffff;--s2:#f0f1f4;--border:#d8dbe0;
-  --text:#1a1a1a;--dim:#6b7280;--accent:#F26522;--accent-d:#d4571a;
+  --bg:#f0f2f5;--s1:#ffffff;--s2:#f5f7fa;--border:#c8ced6;
+  --text:#0a0e1a;--dim:#4b5563;--accent:#F26522;--accent-d:#d4571a;
 }
-[data-theme="light"] body{background:linear-gradient(180deg,#f5f6f8 0%, #e8eaef 100%);}
-[data-theme="light"] .card{box-shadow:0 1px 3px rgba(0,0,0,0.06);}
-[data-theme="light"] .tank-body{background:#e8eaef;border-color:#cbd1d8;}
+[data-theme="light"] body{background:linear-gradient(180deg,#f0f2f5 0%, #dfe4eb 100%);color:var(--text);}
+[data-theme="light"] .card{box-shadow:0 1px 4px rgba(0,0,0,0.08);border-color:#d0d7de;background:#fff;}
+[data-theme="light"] .tank-body{background:#e0e4ea;border-color:#b8bfc9;}
+[data-theme="light"] .tank-cap{color:#374151;}
 [data-theme="light"] .h-info,
-[data-theme="light"] .home-btn{background:#fff;}
+[data-theme="light"] .home-btn{background:#fff;color:var(--text);}
+/* Títulos de módulos y secciones — contraste ALTO */
+[data-theme="light"] .ct{color:#0a0e1a;font-weight:900;}
+[data-theme="light"] .dash-mod-ico + span,
+[data-theme="light"] .home-section{color:#0a0e1a;}
+/* Labels de estanques (DIESEL, GASOLINA, KEROSENE...) */
+[data-theme="light"] .tank-lbl,
+[data-theme="light"] .tank-hd{color:#1a1a1a;font-weight:800;}
+/* Otros textos secundarios */
+[data-theme="light"] .fecha,
+[data-theme="light"] .dt,
+[data-theme="light"] .dash-turno-fecha,
+[data-theme="light"] .db{color:#0a0e1a;}
+/* Consumo y valores del dashboard */
+[data-theme="light"] .consumo-lbl{color:#374151;font-weight:800;}
+[data-theme="light"] .consumo-sub{color:#4b5563;}
+/* Tabs */
+[data-theme="light"] .tab{color:#4b5563;}
+[data-theme="light"] .tab.active{color:#0a0e1a;background:#e5e7eb;}
+[data-theme="light"] header{background:#fff;border-bottom:1px solid #d0d7de;}
+[data-theme="light"] .h-btn{background:#f5f7fa;color:#0a0e1a;border-color:#c8ced6;}
+/* Inputs */
+[data-theme="light"] input,[data-theme="light"] select,[data-theme="light"] textarea{
+  background:#fff;color:#0a0e1a;border-color:#c8ced6;}
+[data-theme="light"] label{color:#374151;font-weight:700;}
+/* Botones */
+[data-theme="light"] .db-refresh{background:#fff;color:#0a0e1a;border-color:#c8ced6;}
+/* Home screen */
+[data-theme="light"] .home-greeting{color:#0a0e1a;}
+[data-theme="light"] .home-date{color:#4b5563;}
+[data-theme="light"] .home-btn .hb-name{color:#0a0e1a;font-weight:800;}
+[data-theme="light"] .home-btn .hb-desc{color:#4b5563;}
+/* Cards de análisis mensual */
+[data-theme="light"] .rm-item{background:#f5f7fa;border-color:#c8ced6;}
+[data-theme="light"] .rm-lbl{color:#374151;}
+[data-theme="light"] .rm-sub{color:#6b7280;}
+/* Splash / login */
+[data-theme="light"] #splash{background:linear-gradient(180deg,#f0f2f5 0%, #dfe4eb 100%);}
+[data-theme="light"] .login-card{background:#fff;border-color:#c8ced6;}
+[data-theme="light"] .login-brand{color:#0a0e1a;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
 /* Acento MVC sutil en el fondo */
@@ -235,7 +275,6 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
   transition:border-color .2s;width:100%;}
 .pclg:hover{border-color:var(--accent);}
 .pclg.has{border-style:solid;border-color:var(--green);}
-.pclg.has-an{border-color:var(--diesel);}
 .pclg.has-de{border-color:var(--green);}
 .pclg input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;}
 .pclg img.prev{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:7px;}
@@ -290,16 +329,6 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
 .btn-sub.gr:hover{background:#40ffb0;}
 
 /* ── DASHBOARD ────────────────────────────────────────────── */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:14px;}
-.kpi{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
-.kv{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:900;color:var(--bright);line-height:1;}
-.kl{font-size:10px;color:var(--dim);margin-top:4px;letter-spacing:1.5px;text-transform:uppercase;}
-.kpi.ac .kv{color:var(--accent);}
-.kpi.di .kv{color:var(--diesel);}
-.kpi.ga .kv{color:var(--gasolina);}
-.kpi.gs .kv{color:var(--gas);}
-.kpi.ko .kv{color:var(--kero);}
-.kpi.re .kv{color:var(--red);}
 
 /* ── RECORDS ──────────────────────────────────────────────── */
 .rec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
@@ -1869,7 +1898,7 @@ let pendingQueue=[];
 // Pega aquí la URL pública de tu implementación (Deploy → Web app)
 // que termina en /exec
 // ═══════════════════════════════════════════════════════════════
-const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbz0aAnXgFMODUPCZ8mSQLPdkWHMlFaGP-VyW8E7_D3mwDyKKLnPet8O-vs9r_5o8xC1KA/exec';
+const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycby1FJqwLFS2woUa9PQZMi_YkAHQDgZiVKK8JBuoXZMR3MB7jOb5_o6bQgaCWAFvcXnMJA/exec';
 
 let SCRIPT_URL = SCRIPT_URL_DEFAULT;
 const ML={M:'Mañana',T:'Tarde',N:'Noche'}, MI={M:'🌅',T:'☀️',N:'🌙'};
@@ -1890,11 +1919,6 @@ function saveConfig(){
   updateSyncUI();
   showToast('✔ Configuración guardada');
   if(pendingQueue.length>0) flushQueue();
-}
-function toggleCfg(){
-  const p=document.getElementById('cfg-panel');
-  p.classList.toggle('on');
-  if(p.classList.contains('on')&&SCRIPT_URL) document.getElementById('cfg-url').value=SCRIPT_URL;
 }
 function toggleHomeCfg(){
   var p=document.getElementById('home-cfg-panel');
@@ -2067,7 +2091,7 @@ async function doLogin(){
   loadConfig();
 
   var urlOk = SCRIPT_URL && SCRIPT_URL.length > 30 && SCRIPT_URL.indexOf('REEMPLAZAR') === -1 && SCRIPT_URL.indexOf('script.google.com') > -1;
-  console.log('[Login] SCRIPT_URL:', SCRIPT_URL, 'válida:', urlOk);
+  
 
   // 2. Combinar usuarios locales + cacheados de Sheets
   var usuariosCombinados = USERS.slice();
@@ -2101,7 +2125,7 @@ async function doLogin(){
   }
 
   // 4. Buscar match (case-insensitive usuario, trim ambos lados)
-  console.log('[Login] Buscando match para u="'+u+'" p="'+p+'"');
+  
   console.log('[Login] Lista final:', usuariosCombinados.map(function(x){
     return x.usuario+'/'+x.pass+'('+x.role+')';
   }).join(' | '));
@@ -2131,7 +2155,7 @@ async function doLogin(){
       lerr.innerHTML = '⚠ Usuario o contraseña incorrectos<br><span style="font-size:10px;opacity:.7;">Verifica: '+u+' / '+p+'</span>';
     }
     loadingHide();
-    console.log('[Login] ✗ Sin match para u="'+u+'" p="'+p+'"');
+    
   }
 }
 
@@ -2914,7 +2938,7 @@ async function loadDashboard(){
       var txt = await resp.text();
       // Verificar nuevamente después del await del texto
       if(myReqId !== __dashReqId){
-        console.log('[Dashboard] Respuesta obsoleta descartada después de leer texto');
+        
         return;
       }
 
@@ -2929,7 +2953,7 @@ async function loadDashboard(){
         // Solo aplicar si seguimos en la fecha solicitada y es la petición más reciente
         if(myReqId !== __dashReqId) return;
         if(dashGetFecha() !== fecha){
-          console.log('[Dashboard] La fecha cambió mientras esperaba — descartando datos de '+fecha);
+          
           return;
         }
         var enriched = enriquecerConCargas(json.data);
@@ -3250,7 +3274,7 @@ function renderTanks(data){
   } else {
     window.dashCargasDia = [];
   }
-  console.log('Cargas del día expuestas al PDF:', window.dashCargasDia.length, window.dashCargasDia);
+  
 
   // ── CARGAS RECIENTES ──────────────────────────────
   var cc = document.getElementById('dash-carga-content');
@@ -3589,7 +3613,6 @@ function closeDelModal(){document.getElementById('del-modal').classList.remove('
 function openLB(src){document.getElementById('lb-img').src=src;document.getElementById('lb').classList.add('open');}
 function closeLB(){document.getElementById('lb').classList.remove('open');}
 function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(type?' '+type:'');setTimeout(()=>t.classList.remove('show'),2800);}
-
 
 // ═══════════════ PWA SERVICE WORKER ═══════════════
 if ('serviceWorker' in navigator) {
@@ -3978,12 +4001,10 @@ async function generarPDF(){
       // Columna izquierda: Niveles + Operabilidad
       // Columna derecha: Consumo
       var colW = (pageW - margen*2 - 4) / 2;
-      var yInicio = y;
       var yIzq = y;
       var yDer = y;
 
       // ── Cuadro Niveles (columna izquierda) ──
-      var yAntes = y;
       y = yIzq;
       dibujarCuadro({
         titulo: 'Niveles',
@@ -4123,19 +4144,47 @@ async function generarPDF(){
         ]
       });
 
-      // Gráfico — capturar en alta resolución
+      // Gráfico — capturar en tema CLARO forzado (mejor lectura en papel)
       try {
         var canvasG = document.getElementById('dash-grafico');
         if(canvasG){
-          // Capturar a mayor resolución usando html2canvas para mejor calidad
+          // Forzar tema claro temporalmente para capturar
+          var temaOriginal = document.documentElement.getAttribute('data-theme') || 'dark';
+          document.documentElement.setAttribute('data-theme', 'light');
+          // Rerender el gráfico con colores claros y labels oscuros
+          if(dashChart){
+            dashChart.options.plugins.datalabels = { forceLight: true };
+            // Ajustar colores de ejes para tema claro
+            dashChart.options.scales.x.ticks.color = '#0a0e1a';
+            dashChart.options.scales.y.ticks.color = '#0a0e1a';
+            dashChart.options.scales.x.title.color = '#0a0e1a';
+            dashChart.options.scales.y.title.color = '#0a0e1a';
+            dashChart.options.scales.y.grid.color  = 'rgba(0,0,0,0.08)';
+            dashChart.update('none');
+          }
+          await new Promise(function(r){ setTimeout(r, 250); });
+
           var canvasHQ = await html2canvas(canvasG.parentElement, {
-            backgroundColor: '#1a1a1a',
+            backgroundColor: '#ffffff',
             scale: 2,
             logging: false,
             useCORS: true,
             allowTaint: true
           });
-          var imgGrafico = canvasHQ.toDataURL('image/jpeg', 0.78);
+
+          // Restaurar tema original
+          document.documentElement.setAttribute('data-theme', temaOriginal);
+          if(dashChart){
+            delete dashChart.options.plugins.datalabels;
+            dashChart.options.scales.x.ticks.color = '#aaa';
+            dashChart.options.scales.y.ticks.color = '#aaa';
+            dashChart.options.scales.x.title.color = '#aaa';
+            dashChart.options.scales.y.title.color = '#aaa';
+            dashChart.options.scales.y.grid.color  = 'rgba(255,255,255,0.05)';
+            dashChart.update('none');
+          }
+
+          var imgGrafico = canvasHQ.toDataURL('image/jpeg', 0.82);
           var imgW = pageW - margen*2;
           var imgH = (canvasHQ.height * imgW) / canvasHQ.width;
           if(imgH > 80){
@@ -4197,9 +4246,9 @@ async function generarPDF(){
       });
     });
 
-    console.log('PDF Bloque 3: fotos sectores=', allFotos);
-    console.log('PDF Bloque 3: dashCargasDia=', window.dashCargasDia);
-    console.log('PDF Bloque 3: fotos totales contadas=', totalFotos);
+    
+    
+    
 
     if(totalFotos === 0){
       mensajeSinDatos('No existen datos fotográficos');
@@ -4778,7 +4827,7 @@ async function loadAnalisisMensual(){
   console.log('[Análisis] Cargando mes='+mes+' combust='+combust+' URL='+(SCRIPT_URL?'sí':'no'));
 
   if(!SCRIPT_URL){
-    console.log('[Análisis] Sin URL — usando datos locales');
+    
     renderAnalisisLocal(mes, combust);
     return;
   }
@@ -4793,15 +4842,15 @@ async function loadAnalisisMensual(){
 
   try{
     var url  = SCRIPT_URL + '?action=getAnalisisMensual&mes='+encodeURIComponent(mes)+'&combustible='+encodeURIComponent(combust);
-    console.log('[Análisis] Fetch:', url);
+    
     var resp = await fetch(url);
-    if(myReqId !== __analisisReqId){ console.log('[Análisis] Petición obsoleta descartada'); return; }
+    if(myReqId !== __analisisReqId){  return; }
     if(!resp.ok) throw new Error('HTTP '+resp.status);
     var txt = await resp.text();
-    if(myReqId !== __analisisReqId){ console.log('[Análisis] Petición obsoleta tras texto'); return; }
+    if(myReqId !== __analisisReqId){  return; }
     var json = JSON.parse(txt);
     if(json.ok && json.data){
-      console.log('[Análisis] OK datos:', json.data);
+      
       renderAnalisis(json.data, combust);
     } else {
       throw new Error(json.error || 'El script no devolvió datos. ¿Republicaste con Nueva implementación?');
@@ -4963,6 +5012,17 @@ var datalabelsPlugin = {
   id: 'datalabels',
   afterDatasetsDraw: function(chart) {
     var ctx = chart.ctx;
+    // Detectar si estamos generando el PDF (usa color oscuro fijo) o
+    // el tema actual del dashboard
+    var forcedLight = chart.options && chart.options.plugins &&
+                      chart.options.plugins.datalabels &&
+                      chart.options.plugins.datalabels.forceLight;
+    var tema = forcedLight ? 'light'
+             : (document.documentElement.getAttribute('data-theme') || 'dark');
+    // En claro los números van en color oscuro para contraste con fondo blanco
+    // En oscuro van en color claro brillante para contraste con fondo negro
+    var colorLabel = (tema === 'light') ? '#0a0e1a' : '#ffffff';
+
     ctx.save();
     chart.data.datasets.forEach(function(ds, dsIdx){
       var meta = chart.getDatasetMeta(dsIdx);
@@ -4970,11 +5030,10 @@ var datalabelsPlugin = {
         var val = ds.data[i];
         if(!val || val === 0) return;
         var pos = bar.tooltipPosition();
-        ctx.fillStyle = ds.borderColor;
-        ctx.font = 'bold 9px Barlow Condensed, Arial';
+        ctx.fillStyle = colorLabel;
+        ctx.font = 'bold 10px Barlow Condensed, Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
-        // Formato: 1.5K para miles, sino el número
         var txt = val >= 1000 ? (val/1000).toFixed(1)+'K' : String(val);
         ctx.fillText(txt, pos.x, pos.y - 4);
       });
@@ -5109,15 +5168,6 @@ function formatMes(mes){
 }
 
 // ═══════════════ GESTIÓN USUARIOS ═══════════════
-function goPageUsuarios(tab){
-  if(!CU || CU.role !== 'admin'){
-    showToast('⚠ Acceso solo para administradores','warn');
-    return;
-  }
-  goPage('usuarios', tab);
-  cargarUsuariosDeSheets();
-}
-
 async function cargarUsuariosDeSheets(){
   var cont = document.getElementById('usr-lista');
   if(!cont) return;
