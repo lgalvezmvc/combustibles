@@ -935,6 +935,8 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
     <div class="tab" onclick="goPage('horno',this)">Horno P.Baja</div>
     <div class="tab" onclick="goPage('reactivos',this)">Reactivos</div>
     <div class="tab" onclick="goPage('carga',this)">Descarga Combustible</div>
+    <div class="tab" onclick="goPage('gascasino',this)">🔥 Gas Casino</div>
+    <div class="tab" onclick="goPage('gashorno',this)">🔥 Gas Horno</div>
     <div class="tab" onclick="goPage('dashboard',this)">📊 Dashboard</div>
     <div class="tab" id="tab-admin" onclick="goPage('admin',this)" style="display:none;color:var(--red);">🔧 Admin</div>
     <div class="tab" id="tab-usuarios" onclick="goPage('usuarios',this)" style="display:none;color:var(--red);">👤 Usuarios</div>
@@ -1240,7 +1242,7 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
         <div class="pi"><div class="pl">ORPAK</div><div class="pc" id="ph-isla-orpak"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'isla','orpak')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','orpak')">✕</button></div></div>
         <div class="pi"><div class="pl">Cnt. Diesel</div><div class="pc" id="ph-isla-cnt-diesel"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'isla','cnt_diesel')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','cnt_diesel')">✕</button></div></div>
         <div class="pi"><div class="pl">Cnt. Gasolina</div><div class="pc" id="ph-isla-cnt-gasolina"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'isla','cnt_gasolina')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','cnt_gasolina')">✕</button></div></div>
-        <div class="pi"><div class="pl">Reloj Gas Casino</div><div class="pc" id="ph-isla-reloj-gas"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'isla','reloj_gas')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','reloj_gas')">✕</button></div></div>
+        
         <div class="pi"><div class="pl">Med. Diesel</div><div class="pc" id="ph-isla-med-diesel"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'isla','med_diesel')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','med_diesel')">✕</button></div></div>
         <div class="pi"><div class="pl">Med. Gasolina</div><div class="pc" id="ph-isla-med-gasolina"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'isla','med_gasolina')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','med_gasolina')">✕</button></div></div>
       </div>
@@ -1257,13 +1259,6 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
       <div class="fg2">
         <div class="fg"><label>Contador Gasolina<span class="req">*</span></label><input type="number" id="i-cnt-g" placeholder="0.00" step="0.01" required class="required-field"></div>
         <div class="fg"><label>Est. Gasolina (lts)<span class="req">*</span> <span class="cap-lbl">máx 20.000</span></label><input type="number" id="i-med-g" placeholder="0" min="0" max="20000" required class="required-field" oninput="chkCap(this,20000)"><div class="cap-bar-wrap"><div class="cap-bar" id="cap-i-med-g"></div></div></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="ct"><span class="dot gs"></span>Gas Licuado Casino (%)<span class="req" style="font-size:16px;margin-left:4px">*</span></div>
-      <div class="fg"><label>Porcentaje</label>
-        <input type="number" id="i-gas" placeholder="0" min="0" max="100" required class="required-field" oninput="updBar('ibg','ibv',this.value)">
-        <div class="pct-wrap"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--dim)"><span>Nivel</span><span id="ibv">0%</span></div><div class="pbar-bg"><div class="pbar" id="ibg" style="width:0%"></div></div></div>
       </div>
     </div>
     <div class="card">
@@ -1308,13 +1303,6 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
       <div class="fg2">
         <div class="fg"><label>Est. Diesel (lts)<span class="req">*</span> <span class="cap-lbl">máx 40.000</span></label><input type="number" id="h-med-d" placeholder="0" min="0" max="40000" required class="required-field" oninput="chkCap(this,40000)"><div class="cap-bar-wrap"><div class="cap-bar" id="cap-h-med-d"></div></div></div>
         <div class="fg"><label>Est. Kerosene (lts)<span class="req">*</span> <span class="cap-lbl">máx 13.000</span></label><input type="number" id="h-med-k" placeholder="0" min="0" max="13000" required class="required-field" oninput="chkCap(this,13000)"><div class="cap-bar-wrap"><div class="cap-bar" id="cap-h-med-k"></div></div></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="ct"><span class="dot gs"></span>Gas Licuado Horno (%)<span class="req" style="font-size:16px;margin-left:4px">*</span></div>
-      <div class="fg"><label>Porcentaje</label>
-        <input type="number" id="h-gas" placeholder="0" min="0" max="100" required class="required-field" oninput="updBar('hbg','hbv',this.value)">
-        <div class="pct-wrap"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--dim)"><span>Nivel</span><span id="hbv">0%</span></div><div class="pbar-bg"><div class="pbar" id="hbg" style="width:0%"></div></div></div>
       </div>
     </div>
     <div class="card">
@@ -1449,6 +1437,98 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
       <div class="fg"><textarea id="c-obs" placeholder="Ej: Carga sin incidentes. Llegó a las 14:30 hrs..."></textarea></div>
     </div>
     <button class="btn-sub gr" onclick="submitCarga()">⛽ Guardar Registro de Carga</button>
+  </div>
+
+  <!-- GAS CASINO ─────────────────────────────────────────────── -->
+  <div class="page" id="page-gascasino">
+    <div class="dt">Fecha: <span class="db" id="hoy-gascasino"></span></div>
+    <div class="card">
+      <div class="ct"><span class="dot a"></span>Medición del Día</div>
+      <div class="fg2">
+        <div class="fg">
+          <label>Turno<span class="req">*</span></label>
+          <select id="gc-med" class="required-field">
+            <option value="">Seleccionar...</option>
+            <option value="M">🌅 Mañana</option>
+            <option value="T">☀️ Tarde</option>
+            <option value="N">🌙 Noche</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct"><span class="dot gs"></span>Nivel Gas Licuado Casino (%)<span class="req" style="font-size:16px;margin-left:4px">*</span></div>
+      <div class="fg"><label>Porcentaje</label>
+        <input type="number" id="gc-pct" placeholder="0" min="0" max="100" required class="required-field" oninput="updBar('gcbg','gcbv',this.value)">
+        <div class="pct-wrap">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--dim)"><span>Nivel</span><span id="gcbv">0%</span></div>
+          <div class="pbar-bg"><div class="pbar" id="gcbg" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct"><span class="dot a"></span>📷 Foto</div>
+      <div class="pi" style="margin-top:8px;">
+        <div class="pl">Reloj Gas Casino</div>
+        <div class="pc" id="ph-gascasino-reloj">
+          <input type="file" accept="image/*" capture="environment" onchange="capP(this,'gascasino','reloj')">
+          <div class="pico">📷</div>
+          <div class="phi">Foto</div>
+          <button class="prm" onclick="remP(event,'gascasino','reloj')">✕</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct"><span class="dot a"></span>Observaciones</div>
+      <div class="fg"><textarea id="gc-obs" placeholder="Observaciones del control..."></textarea></div>
+    </div>
+    <button class="btn-sub" onclick="submitMed('gascasino')">💾 Guardar — Gas Casino</button>
+  </div>
+
+  <!-- GAS HORNO ──────────────────────────────────────────────── -->
+  <div class="page" id="page-gashorno">
+    <div class="dt">Fecha: <span class="db" id="hoy-gashorno"></span></div>
+    <div class="card">
+      <div class="ct"><span class="dot a"></span>Medición del Día</div>
+      <div class="fg2">
+        <div class="fg">
+          <label>Turno<span class="req">*</span></label>
+          <select id="gh-med" class="required-field">
+            <option value="">Seleccionar...</option>
+            <option value="M">🌅 Mañana</option>
+            <option value="T">☀️ Tarde</option>
+            <option value="N">🌙 Noche</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct"><span class="dot gs"></span>Nivel Gas Licuado Horno (%)<span class="req" style="font-size:16px;margin-left:4px">*</span></div>
+      <div class="fg"><label>Porcentaje</label>
+        <input type="number" id="gh-pct" placeholder="0" min="0" max="100" required class="required-field" oninput="updBar('ghbg','ghbv',this.value)">
+        <div class="pct-wrap">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--dim)"><span>Nivel</span><span id="ghbv">0%</span></div>
+          <div class="pbar-bg"><div class="pbar" id="ghbg" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct"><span class="dot a"></span>📷 Foto</div>
+      <div class="pi" style="margin-top:8px;">
+        <div class="pl">Reloj Gas Horno</div>
+        <div class="pc" id="ph-gashorno-reloj">
+          <input type="file" accept="image/*" capture="environment" onchange="capP(this,'gashorno','reloj')">
+          <div class="pico">📷</div>
+          <div class="phi">Foto</div>
+          <button class="prm" onclick="remP(event,'gashorno','reloj')">✕</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct"><span class="dot a"></span>Observaciones</div>
+      <div class="fg"><textarea id="gh-obs" placeholder="Observaciones del control..."></textarea></div>
+    </div>
+    <button class="btn-sub" onclick="submitMed('gashorno')">💾 Guardar — Gas Horno</button>
   </div>
 
   <!-- REVISIÓN POR FECHA ──────────────────────────────────────── -->
@@ -1898,7 +1978,7 @@ let pendingQueue=[];
 // Pega aquí la URL pública de tu implementación (Deploy → Web app)
 // que termina en /exec
 // ═══════════════════════════════════════════════════════════════
-const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycby1FJqwLFS2woUa9PQZMi_YkAHQDgZiVKK8JBuoXZMR3MB7jOb5_o6bQgaCWAFvcXnMJA/exec';
+const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycby_REEMPLAZAR_CON_TU_URL/exec';
 
 let SCRIPT_URL = SCRIPT_URL_DEFAULT;
 const ML={M:'Mañana',T:'Tarde',N:'Noche'}, MI={M:'🌅',T:'☀️',N:'🌙'};
@@ -2195,13 +2275,15 @@ function aplicarPermisosUI(){
   // - operador: solo ingreso (isla, horno, reactivos, carga) + resumen del día
   // - visualizador: solo dashboard
   var tabs = {
-    'tab-isla':      ['admin','supervisor','operador'],
-    'tab-horno':     ['admin','supervisor','operador'],
-    'tab-reactivos': ['admin','supervisor','operador'],
-    'tab-carga':     ['admin','supervisor','operador'],
-    'tab-dashboard': ['admin','supervisor','visualizador'],
-    'tab-admin':     ['admin'],
-    'tab-usuarios':  ['admin']
+    'tab-isla':       ['admin','supervisor','operador'],
+    'tab-horno':      ['admin','supervisor','operador'],
+    'tab-reactivos':  ['admin','supervisor','operador'],
+    'tab-carga':      ['admin','supervisor','operador'],
+    'tab-gascasino':  ['admin','supervisor','operador'],
+    'tab-gashorno':   ['admin','supervisor','operador'],
+    'tab-dashboard':  ['admin','supervisor','visualizador'],
+    'tab-admin':      ['admin'],
+    'tab-usuarios':   ['admin']
   };
 
   // Aplicar visibilidad por id (los tabs tienen onclick→goPage, asignamos id si falta)
@@ -2211,6 +2293,8 @@ function aplicarPermisosUI(){
     'horno p.baja': 'tab-horno',
     'reactivos': 'tab-reactivos',
     'descarga combustible': 'tab-carga',
+    '🔥 gas casino': 'tab-gascasino',
+    '🔥 gas horno': 'tab-gashorno',
     '📊 dashboard': 'tab-dashboard'
   };
   navTabs.forEach(function(t){
@@ -2455,7 +2539,7 @@ function goPage(id,tab){
     return;
   }
   // Bloqueo: módulos de ingreso no accesibles para visualizador
-  if((id==='isla'||id==='horno'||id==='reactivos'||id==='carga') && CU && CU.role==='visualizador'){
+  if((id==='isla'||id==='horno'||id==='reactivos'||id==='carga'||id==='gascasino'||id==='gashorno') && CU && CU.role==='visualizador'){
     showToast('⚠ Solo visualización de dashboards','warn');
     return;
   }
@@ -2498,7 +2582,9 @@ function capP(input,mod,key){
     if(!photos[mod])photos[mod]={};
     photos[mod][key]=e.target.result;
     applyPhoto('ph-'+mod+'-'+key.replace(/_/g,'-'),e.target.result);
-    showToast('📷 Foto lista — toca ⬇ para guardar en galería');
+    // Guardar automáticamente en Descargas (Android indexa por Google Fotos)
+    autoGuardarGaleria(e.target.result, mod, key);
+    showToast('📷 Foto capturada y guardada en Descargas');
   };
   reader.readAsDataURL(file);
 }
@@ -2515,7 +2601,8 @@ function capC(input,key){
   reader.onload=function(e){
     cFotos[key]=e.target.result;
     applyPhoto('ph-c-'+key.replace(/_/g,'-'),e.target.result);
-    showToast('📷 Foto lista — toca ⬇ para guardar en galería');
+    autoGuardarGaleria(e.target.result, 'carga', key);
+    showToast('📷 Foto capturada y guardada en Descargas');
   };
   reader.readAsDataURL(file);
 }
@@ -2558,6 +2645,38 @@ function clearPC(cid){
   var img=c.querySelector('img.prev');if(img)img.remove();
   var sv=c.querySelector('a.psave');if(sv)sv.remove();
   var fi=c.querySelector('input[type="file"]');if(fi)fi.value='';
+}
+
+// ═══════════════ GUARDAR FOTOS EN GALERÍA (Android) ═══════════════
+// Fuerza descarga con nombre estructurado. Android agrupa por carpeta simulada.
+// iOS: abre en nueva pestaña para que el usuario guarde manualmente.
+function autoGuardarGaleria(dataUrl, mod, key){
+  try {
+    var d = new Date();
+    var fechaCarpeta = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    var hora = String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+String(d.getSeconds()).padStart(2,'0');
+    // Nombre estructurado: MVC_2026-06-28_Isla_MedDiesel_143025.jpg
+    var modLbl = ({isla:'Isla', horno:'Horno', reactivos:'Reactivos', carga:'Descarga'})[mod] || mod;
+    var keyLbl = key.replace(/_/g,'').replace(/^./, function(c){return c.toUpperCase();});
+    var filename = 'MVC_' + fechaCarpeta + '_' + modLbl + '_' + keyLbl + '_' + hora + '.jpg';
+
+    // iOS no soporta download automático → abrir para guardar manual
+    if(/iPad|iPhone|iPod/.test(navigator.userAgent)){
+      // No abrir automáticamente en iOS (molesto). El botón ⬇ sigue disponible.
+      return;
+    }
+
+    // Android/Desktop: descarga automática silenciosa
+    var a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ document.body.removeChild(a); }, 100);
+  } catch(e){
+    console.warn('autoGuardarGaleria falló:', e.message);
+  }
 }
 
 // ═══════════════ TOGGLES / BARRA ═══════════════
@@ -2687,7 +2806,10 @@ function gv(id){const el=document.getElementById(id);return el?el.value:'';}
 // FIX: guardar en localStorage sin fotos (evita quota exceeded).
 // Las fotos se envían al sync inmediato, luego se descartan de memoria.
 async function submitMed(mod){
-  const med=meds[mod];
+  // Para gas casino y horno el turno viene del select interno
+  var med = meds[mod];
+  if(mod==='gascasino') med = gv('gc-med');
+  if(mod==='gashorno')  med = gv('gh-med');
   if(!med){showToast('⚠ Seleccione Mañana, Tarde o Noche','warn');return;}
   const recs=getRecs(),today=todayISO();
   if(recs.find(function(r){return r.module===mod&&r.date===today&&r.data&&r.data.med===med;})){
@@ -2702,13 +2824,17 @@ async function submitMed(mod){
     if(!gv('i-cnt-g')) errores.push('Contador Gasolina');
     if(!gv('i-med-d')) errores.push('Est. Diesel (lts)');
     if(!gv('i-med-g')) errores.push('Est. Gasolina (lts)');
-    if(!gv('i-gas'))   errores.push('Gas Casino (%)');
+
   } else if(mod==='horno'){
     if(!gv('h-med-d')) errores.push('Est. Diesel (lts)');
     if(!gv('h-med-k')) errores.push('Est. Kerosene (lts)');
-    if(!gv('h-gas'))   errores.push('Gas Horno (%)');
+
   } else if(mod==='reactivos'){
     if(!gv('r-med-d')) errores.push('Est. Diesel (lts)');
+  } else if(mod==='gascasino'){
+    if(!gv('gc-pct')) errores.push('Nivel Gas Casino (%)');
+  } else if(mod==='gashorno'){
+    if(!gv('gh-pct')) errores.push('Nivel Gas Horno (%)');
   }
   if(errores.length > 0){
     showToast('⚠ Campos obligatorios: '+errores.join(', '),'warn');
@@ -2727,17 +2853,19 @@ async function submitMed(mod){
     data={med:med,
       cnt_diesel:gv('i-cnt-d'),cnt_gasolina:gv('i-cnt-g'),
       med_diesel:gv('i-med-d'),med_gasolina:gv('i-med-g'),
-      gas_pct:gv('i-gas'),
       op_surtidores:toggles['is']||'',op_orpak:toggles['io']||'',
       obs:gv('i-obs')};
   } else if(mod==='horno'){
     data={med:med,
       med_diesel:gv('h-med-d'),med_kerosene:gv('h-med-k'),
-      gas_pct:gv('h-gas'),
       op_surtidores:toggles['hs']||'',op_orpak:toggles['ho']||'',
       obs:gv('h-obs')};
   } else if(mod==='reactivos'){
     data={med:med,med_diesel:gv('r-med-d'),obs:gv('r-obs')};
+  } else if(mod==='gascasino'){
+    data={med:med, gas_pct: gv('gc-pct'), obs: gv('gc-obs')};
+  } else if(mod==='gashorno'){
+    data={med:med, gas_pct: gv('gh-pct'), obs: gv('gh-obs')};
   }
   var recId=Date.now().toString();
   // Record para localStorage (SIN fotos para no superar cuota)
@@ -2823,7 +2951,7 @@ function clearMed(mod){
   photos[mod]={};meds[mod]=null;
   document.getElementById('ms-'+mod)?.querySelectorAll('.mo').forEach(b=>b.classList.remove('sm','st','sn'));
   const mh=document.getElementById('mh-'+mod);if(mh)mh.textContent='Seleccione el horario de la medición';
-  const fmap={isla:['i-cnt-d','i-cnt-g','i-med-d','i-med-g','i-gas','i-obs'],horno:['h-med-d','h-med-k','h-gas','h-obs'],reactivos:['r-med-d','r-obs']};
+  const fmap={isla:['i-cnt-d','i-cnt-g','i-med-d','i-med-g','i-obs'],horno:['h-med-d','h-med-k','h-obs'],reactivos:['r-med-d','r-obs'],gascasino:['gc-med','gc-pct','gc-obs'],gashorno:['gh-med','gh-pct','gh-obs']};
   (fmap[mod]||[]).forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   if(mod==='isla'){updBar('ibg','ibv',0);['is','io'].forEach(id=>{toggles[id]='';['si','o'].forEach(s=>{const el=document.getElementById(id+(s==='si'?'si':'no')||id+s);if(el)el.classList.remove('on');});});['issi','isno','iosi','ioo'].forEach(id=>{document.getElementById(id)?.classList.remove('on');});}
   if(mod==='horno'){updBar('hbg','hbv',0);['hssi','hsno','hosi','hoo'].forEach(id=>{document.getElementById(id)?.classList.remove('on');});}
@@ -2925,6 +3053,22 @@ async function loadDashboard(){
   if(SCRIPT_URL){
     if(sta){ sta.style.display='block'; sta.className='dash-status loading';
       sta.textContent='⟳ Cargando datos '+formatFecha(fecha)+'...'; }
+    // ── CACHE LOCAL: mostrar datos cacheados inmediatamente ──
+    var cacheKey = 'mvc_cache_dash_' + fecha;
+    var cached = null;
+    try { cached = JSON.parse(localStorage.getItem(cacheKey) || 'null'); } catch(e){}
+    if (cached && cached.data) {
+      var edadMs = Date.now() - (cached.ts || 0);
+      var edadMin = Math.round(edadMs / 60000);
+      // Renderizar cache si es reciente (< 24h)
+      if (edadMs < 24 * 3600 * 1000) {
+        var enriched = enriquecerConCargas(cached.data);
+        renderTanks(enriched);
+        if(sta){ sta.className='dash-status ok';
+          sta.textContent='⚡ Cache local ('+(edadMin<1?'ahora':edadMin+' min')+') — actualizando...'; }
+      }
+    }
+
     try{
       var url = SCRIPT_URL + '?action=getDashboard&fecha='+fecha;
       var resp = await fetch(url, { cache: 'no-store' });
@@ -2958,9 +3102,14 @@ async function loadDashboard(){
         }
         var enriched = enriquecerConCargas(json.data);
         renderTanks(enriched);
+        // Guardar en cache local
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify({ data: json.data, ts: Date.now() }));
+        } catch(e){ console.warn('Cache full, limpiando antiguos'); limpiarCacheAntiguo(); }
         var esHoy = fecha === todayISO();
+        var srvCache = json.cached ? ' (cache srv)' : '';
         if(sta){ sta.className='dash-status ok';
-          sta.textContent='✔ '+( esHoy ? 'Datos de hoy' : 'Datos del '+formatFecha(fecha))+' — '+new Date().toLocaleTimeString('es-CL'); }
+          sta.textContent='✔ '+( esHoy ? 'Datos de hoy' : 'Datos del '+formatFecha(fecha))+srvCache+' — '+new Date().toLocaleTimeString('es-CL'); }
       } else {
         throw new Error(json.error||'Sin datos para esta fecha');
       }
@@ -5533,6 +5682,24 @@ function loadingHide(){
   var ov = document.getElementById('loading-overlay');
   if(!ov) return;
   ov.classList.remove('on');
+}
+
+// ── Limpiar cache antiguo cuando localStorage se llena ──
+function limpiarCacheAntiguo(){
+  var ahora = Date.now();
+  var claves = [];
+  for(var i=0; i<localStorage.length; i++){
+    var k = localStorage.key(i);
+    if(k && k.startsWith('mvc_cache_')){
+      try {
+        var v = JSON.parse(localStorage.getItem(k));
+        var edad = ahora - (v.ts || 0);
+        if(edad > 6 * 3600 * 1000){ claves.push(k); }
+      } catch(e){ claves.push(k); }
+    }
+  }
+  claves.forEach(function(k){ localStorage.removeItem(k); });
+  console.log('Limpiadas '+claves.length+' entradas de cache');
 }
 
 // ═══════════════ FIN ═══════════════
