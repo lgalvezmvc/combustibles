@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>MVC — Control de Combustibles</title>
+<!-- Anti-caché: fuerza al navegador a pedir el HTML fresco cada vez -->
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <!-- Favicon SVG embebido (logo MVC con tres puntos verticales naranjas) -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0a'/%3E%3Ccircle cx='14' cy='18' r='5' fill='%23F26522'/%3E%3Ccircle cx='14' cy='32' r='5' fill='%23F26522'/%3E%3Ccircle cx='14' cy='46' r='5' fill='%23F26522'/%3E%3Ctext x='28' y='40' font-family='Arial Black, sans-serif' font-size='22' font-weight='900' fill='%23F26522'%3Emvc%3C/text%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0a'/%3E%3Ccircle cx='14' cy='18' r='5' fill='%23F26522'/%3E%3Ccircle cx='14' cy='32' r='5' fill='%23F26522'/%3E%3Ccircle cx='14' cy='46' r='5' fill='%23F26522'/%3E%3Ctext x='28' y='40' font-family='Arial Black, sans-serif' font-size='22' font-weight='900' fill='%23F26522'%3Emvc%3C/text%3E%3C/svg%3E">
@@ -418,8 +422,6 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
   padding:3px 10px;color:var(--accent);font-weight:700;font-family:'Barlow Condensed',sans-serif;}
 
 /* ── CONFIG PANEL ─────────────────────────────────────────── */
-#cfg-panel{display:none;background:var(--s1);border-bottom:1px solid var(--border);padding:18px 14px;}
-#cfg-panel.on{display:block;}
 .cfg-t{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;
   color:var(--green);letter-spacing:1px;margin-bottom:12px;}
 .cfg-grid{display:grid;grid-template-columns:1fr;gap:10px;}
@@ -701,7 +703,7 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
   /* Ocultar todo excepto el contenido del dashboard */
   body{ background:#fff !important; color:#000 !important; }
   #topbar, #home-screen, #foto-screen, #diag-panel, #del-modal,
-  .lb, .toast, #cfg-panel, #splash { display:none !important; }
+  .lb, .toast, #splash { display:none !important; }
 
   /* Mostrar solo page-dashboard aunque no esté activo */
   .page { display:none !important; }
@@ -911,15 +913,7 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
   </header>
 
   <!-- CONFIG PANEL -->
-  <div id="cfg-panel">
-    <div class="cfg-t">⚙ CONFIGURACIÓN — GOOGLE SHEETS SYNC</div>
-    <div class="cfg-grid">
-      <div class="fg">
-        <label>Google Apps Script URL</label>
-        <input type="url" id="cfg-url" placeholder="https://script.google.com/macros/s/.../exec">
-      </div>
-    </div>
-    <button class="cfg-btn" onclick="saveConfig()">Guardar y Sincronizar</button>
+  <button class="cfg-btn" onclick="saveConfig()">Guardar y Sincronizar</button>
     <div class="cfg-note">ℹ Pega aquí la URL del Apps Script publicado. Ver instrucciones en el archivo de guía adjunto. Los registros pendientes de sincronización se enviarán automáticamente.</div>
   </div>
 
@@ -1744,19 +1738,9 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
     <div class="home-title">Control de Combustibles</div>
     <div style="display:flex;align-items:center;gap:8px;">
       <div class="home-user" id="home-user-name"></div>
-      <button class="h-btn" onclick="toggleHomeCfg()" title="Configurar Google Sheets">⚙ Sync</button>
     </div>
   </div>
-  <!-- Panel cfg inline en home (separado del app) -->
-  <div id="home-cfg-panel" style="display:none;background:var(--s1);border-bottom:1px solid var(--border);padding:16px 14px;">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--green);letter-spacing:1px;margin-bottom:10px;">⚙ CONFIGURACIÓN — GOOGLE SHEETS SYNC</div>
-    <div class="fg" style="margin-bottom:10px;">
-      <label>Google Apps Script URL</label>
-      <input type="url" id="home-cfg-url" placeholder="https://script.google.com/macros/s/.../exec" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--bright);font-family:'Barlow',sans-serif;font-size:13px;outline:none;width:100%;">
-    </div>
-    <button onclick="saveHomeCfg()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;cursor:pointer;width:100%;">Guardar y Sincronizar</button>
-    <div style="font-size:11px;color:var(--dim);margin-top:8px;">ℹ Pega la URL del Apps Script publicado. Los registros pendientes se enviarán automáticamente.</div>
-  </div>
+
   <div class="home-body">
     <!-- Logo -->
     <div class="home-logo">
@@ -1978,17 +1962,77 @@ let pendingQueue=[];
 // Pega aquí la URL pública de tu implementación (Deploy → Web app)
 // que termina en /exec
 // ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// VERSIÓN DE LA APP — hardcodeada. Debe coincidir con version.json
+// Cuando publiques una nueva versión, incrementa este número
+// y también el número en el archivo version.json del repo.
+// ═══════════════════════════════════════════════════════════════
+const APP_VERSION = '4.31';
+
+// URL del script de Apps Script
 const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbzkvLTiFIL5Kl_qHI2J3ogKATW_0J1rOUnuaOwIDaW79gbBL1OAZiKOuCkSjgOrx9mu6w/exec';
 
 let SCRIPT_URL = SCRIPT_URL_DEFAULT;
 const ML={M:'Mañana',T:'Tarde',N:'Noche'}, MI={M:'🌅',T:'☀️',N:'🌙'};
 
+// ═══════════════ AUTO-ACTUALIZACIÓN SILENCIOSA ═══════════════
+// Consulta version.json en el repo. Si difiere de APP_VERSION,
+// significa que el navegador tiene HTML viejo cacheado.
+// Fuerza recarga limpia, borrando cache de datos obsoletos pero
+// preservando sesión, tema y registros locales pendientes.
+async function checkForUpdates(){
+  try {
+    // Añadir timestamp para bypass del cache de version.json
+    var url = 'version.json?_=' + Date.now();
+    var resp = await fetch(url, { cache: 'no-store' });
+    if (!resp.ok) return;
+    var j = await resp.json();
+    if (!j || !j.version) return;
+    if (String(j.version) === String(APP_VERSION)) return; // ya al día
+
+    console.log('[Update] Nueva versión detectada:', j.version, 'actual:', APP_VERSION);
+
+    // Limpiar cache obsoleta (mantener sesión, tema, registros, cola)
+    var preservar = ['mvc_session','mvc_theme','mvc_recs','mvc_queue','mvc_users_sheets'];
+    var claves = [];
+    for (var i = 0; i < localStorage.length; i++) claves.push(localStorage.key(i));
+    claves.forEach(function(k){
+      if (preservar.indexOf(k) === -1) {
+        try { localStorage.removeItem(k); } catch(e){}
+      }
+    });
+
+    // Marcar que ya se detectó la actualización (evitar loop)
+    sessionStorage.setItem('mvc_updating', j.version);
+
+    // Recarga silenciosa forzando bypass de cache
+    // El truco de '?v=xxx' fuerza al navegador a pedir el HTML fresco
+    var sep = window.location.href.indexOf('?') > -1 ? '&' : '?';
+    window.location.href = window.location.href.split('?')[0] + '?v=' + j.version;
+
+  } catch(e) {
+    console.warn('[Update] No se pudo consultar version.json:', e.message);
+  }
+}
+
+// Ejecutar al cargar la app (una sola vez por sesión de página)
+if (!sessionStorage.getItem('mvc_updating')) {
+  checkForUpdates();
+} else {
+  sessionStorage.removeItem('mvc_updating');
+}
+
 // ═══════════════ CONFIGURACIÓN ═══════════════
 function loadConfig(){
-  const cfg=JSON.parse(localStorage.getItem('mvc_cfg')||'{}');
-  // Si hay URL configurada localmente úsala, sino usa la default hardcodeada
-  SCRIPT_URL = cfg.scriptUrl || SCRIPT_URL_DEFAULT;
-  pendingQueue=JSON.parse(localStorage.getItem('mvc_queue')||'[]');
+  // La URL del script SIEMPRE viene del HTML (SCRIPT_URL_DEFAULT).
+  // No se lee ni se guarda en localStorage.
+  SCRIPT_URL = SCRIPT_URL_DEFAULT;
+  // Limpiar cualquier scriptUrl obsoleta que pudiera existir
+  try {
+    var cfg = JSON.parse(localStorage.getItem('mvc_cfg')||'{}');
+    if (cfg.scriptUrl) { delete cfg.scriptUrl; localStorage.setItem('mvc_cfg', JSON.stringify(cfg)); }
+  } catch(e){}
+  pendingQueue = JSON.parse(localStorage.getItem('mvc_queue')||'[]');
   updateSyncUI();
 }
 function saveConfig(){
@@ -2000,17 +2044,7 @@ function saveConfig(){
   showToast('✔ Configuración guardada');
   if(pendingQueue.length>0) flushQueue();
 }
-function toggleHomeCfg(){
-  var p=document.getElementById('home-cfg-panel');
-  if(!p) return;
-  var open=p.style.display!=='none';
-  p.style.display=open?'none':'block';
-  if(!open && SCRIPT_URL) document.getElementById('home-cfg-url').value=SCRIPT_URL;
-}
-function saveHomeCfg(){
-  var url=document.getElementById('home-cfg-url').value.trim();
-  SCRIPT_URL=url;
-  CFG={scriptUrl:url};
+;
   localStorage.setItem('mvc_cfg',JSON.stringify(CFG));
   document.getElementById('home-cfg-panel').style.display='none';
   updateSyncUI();
