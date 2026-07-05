@@ -63,10 +63,29 @@
 [data-theme="light"] .tab.active{color:#0a0e1a;background:#e5e7eb;}
 [data-theme="light"] header{background:#fff;border-bottom:1px solid #d0d7de;}
 [data-theme="light"] .h-btn{background:#f5f7fa;color:#0a0e1a;border-color:#c8ced6;}
-/* Inputs */
-[data-theme="light"] input,[data-theme="light"] select,[data-theme="light"] textarea{
-  background:#fff;color:#0a0e1a;border-color:#c8ced6;}
-[data-theme="light"] label{color:#374151;font-weight:700;}
+/* Inputs — usar alta especificidad + !important para sobreescribir --bright */
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] textarea,
+[data-theme="light"] .fg input,
+[data-theme="light"] .fg select,
+[data-theme="light"] .fg textarea,
+[data-theme="light"] .l-box input,
+[data-theme="light"] .pw-wrap input,
+[data-theme="light"] .fb-wrap input,
+[data-theme="light"] .adm-cell input,
+[data-theme="light"] .adm-cell select{
+  background:#ffffff !important;
+  color:#0a0e1a !important;
+  border-color:#c8ced6 !important;
+}
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder{color:#9ca3af !important;}
+[data-theme="light"] input:focus,
+[data-theme="light"] select:focus,
+[data-theme="light"] textarea:focus{border-color:var(--accent) !important;}
+[data-theme="light"] .fg select option{background:#ffffff !important;color:#0a0e1a !important;}
+[data-theme="light"] label{color:#374151 !important;font-weight:700;}
 /* Botones */
 [data-theme="light"] .db-refresh{background:#fff;color:#0a0e1a;border-color:#c8ced6;}
 /* Home screen */
@@ -80,8 +99,34 @@
 [data-theme="light"] .rm-sub{color:#6b7280;}
 /* Splash / login */
 [data-theme="light"] #splash{background:linear-gradient(180deg,#f0f2f5 0%, #dfe4eb 100%);}
-[data-theme="light"] .login-card{background:#fff;border-color:#c8ced6;}
-[data-theme="light"] .login-brand{color:#0a0e1a;}
+/* Textos generales que se apoyan en --bright siguen viéndose bien en oscuro pero
+   se rompen en claro. Forzar color oscuro para todos los textos que quedaron
+   con --bright dentro del formulario. */
+[data-theme="light"] p, [data-theme="light"] span, [data-theme="light"] div{color:inherit;}
+[data-theme="light"] .card{color:#0a0e1a;}
+/* Cell del admin grid */
+[data-theme="light"] .adm-cell{color:#0a0e1a;background:#ffffff !important;}
+[data-theme="light"] .adm-cell input,
+[data-theme="light"] .adm-cell select{background:#f5f7fa !important;}
+/* Textos de headers dashboard */
+[data-theme="light"] .rm-val{color:#0a0e1a !important;}
+[data-theme="light"] .consumo-val{color:#0a0e1a;}
+[data-theme="light"] .consumo-val.diesel{color:var(--diesel) !important;}
+[data-theme="light"] .consumo-val.gasolina{color:#b8940f !important;} /* amarillo más oscuro visible en fondo claro */
+[data-theme="light"] .consumo-val.kerosene{color:var(--kero) !important;}
+/* Turno / fecha en formularios */
+[data-theme="light"] .dt{color:#0a0e1a !important;}
+[data-theme="light"] .login-card{background:#ffffff !important;border-color:#c8ced6 !important;}
+[data-theme="light"] .login-brand{color:#0a0e1a !important;}
+[data-theme="light"] .login-card h1,
+[data-theme="light"] .login-card h2,
+[data-theme="light"] .login-card label,
+[data-theme="light"] .login-card span,
+[data-theme="light"] .login-card div{color:#0a0e1a !important;}
+[data-theme="light"] .login-card input{color:#0a0e1a !important;background:#f5f7fa !important;border-color:#c8ced6 !important;}
+[data-theme="light"] .login-card input::placeholder{color:#9ca3af !important;}
+[data-theme="light"] .btn-in{color:#ffffff !important;} /* botón ingresar mantiene texto blanco sobre naranja */
+[data-theme="light"] #lerr{color:var(--red) !important;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
 /* Acento MVC sutil en el fondo */
@@ -1994,7 +2039,7 @@ let pendingQueue=[];
 // Cuando publiques una nueva versión, incrementa este número
 // y también el número en el archivo version.json del repo.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = '4.32';
+const APP_VERSION = '4.33';
 
 // URL del script de Apps Script
 const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxx2S1lpVQZ2usUsK2xFxNczOcrrK8cU1XFv-Op3541vKgYcFCxlF9-ZPIzYGePSPLshQ/exec';
