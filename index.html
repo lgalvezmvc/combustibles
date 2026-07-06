@@ -857,7 +857,15 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
 #foto-back:hover{background:var(--accent2);}
 #foto-body{flex:1;display:flex;align-items:center;justify-content:center;
   padding:16px;overflow:hidden;}
-#foto-img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;}
+#foto-img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;
+  transform-origin:center center;transition:transform .12s ease-out;cursor:grab;user-select:none;}
+#foto-img.zoomed{cursor:grab;}
+#foto-img.dragging{cursor:grabbing;transition:none;}
+#foto-body{overflow:hidden;position:relative;}
+#foto-zoom-info{position:absolute;bottom:12px;right:16px;background:rgba(0,0,0,.7);
+  color:#fff;padding:6px 12px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;
+  font-size:13px;letter-spacing:1px;pointer-events:none;opacity:0;transition:opacity .3s;}
+#foto-zoom-info.show{opacity:1;}
 #foto-info{background:rgba(0,0,0,.7);padding:10px 14px;flex-shrink:0;
   font-family:'Barlow Condensed',sans-serif;font-size:12px;color:#aaa;
   letter-spacing:.5px;text-align:center;}
@@ -1968,6 +1976,7 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
   </div>
   <div id="foto-body">
     <img id="foto-img" src="" alt="Fotografía medición">
+    <div id="foto-zoom-info">Zoom 100%</div>
   </div>
   <div id="foto-info" id="foto-info-txt"></div>
 </div>
@@ -2039,10 +2048,10 @@ let pendingQueue=[];
 // Cuando publiques una nueva versión, incrementa este número
 // y también el número en el archivo version.json del repo.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = '4.33';
+const APP_VERSION = '4.34';
 
 // URL del script de Apps Script
-const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxx2S1lpVQZ2usUsK2xFxNczOcrrK8cU1XFv-Op3541vKgYcFCxlF9-ZPIzYGePSPLshQ/exec';
+const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbz-tOPyne_0D-AX6oa2ZP5q3omLZW_EBuQ8whXSk8zuDYzb3bq0F0qVe21eztHmoSsjLQ/exec';
 
 let SCRIPT_URL = SCRIPT_URL_DEFAULT;
 const ML={M:'Mañana',T:'Tarde',N:'Noche'}, MI={M:'🌅',T:'☀️',N:'🌙'};
@@ -2351,7 +2360,7 @@ function abrirApp(){
   loadConfig(); initApp();
   // Aplicar permisos según rol
   aplicarPermisosUI();
-  // Iniciar timer de inactividad (auto-logout a los 5 min sin uso)
+  // Iniciar timer de inactividad (auto-logout a los 20 min sin uso)
   iniciarMonitorActividad();
 }
 
@@ -2515,7 +2524,7 @@ function doLogout(){
 }
 
 // ── Configuración de timeout de inactividad ─────────────────
-var INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutos
+var INACTIVITY_TIMEOUT_MS = 20 * 60 * 1000; // 20 minutos
 var inactivityTimerId = null;
 
 function resetInactivityTimer(){
@@ -3677,13 +3686,109 @@ function abrirFoto(key){
     'react-diesel':'Reactivos — Diesel'
   };
   document.getElementById('foto-img').src = url;
-  document.getElementById('foto-title').textContent = '📷 '+(nombres[key]||key);
+  document.getElementById('foto-title').textContent = '📷 '+(nombres[key]||key)+' — Scroll para zoom · Doble click para 2x';
   document.getElementById('foto-screen').classList.add('on');
+  fotoZoomReset();
+  fotoZoomInit();
 }
 
 function cerrarFoto(){
   document.getElementById('foto-screen').classList.remove('on');
   document.getElementById('foto-img').src = '';
+  fotoZoomReset();
+}
+
+// ═══════════════ ZOOM / PAN en visor de foto ═══════════════
+var fotoZoom = { escala: 1, x: 0, y: 0, arrastrando: false, iniX: 0, iniY: 0, iniPanX: 0, iniPanY: 0 };
+
+function fotoZoomAplicar(){
+  var img = document.getElementById('foto-img');
+  if(!img) return;
+  img.style.transform = 'translate('+fotoZoom.x+'px,'+fotoZoom.y+'px) scale('+fotoZoom.escala+')';
+  var info = document.getElementById('foto-zoom-info');
+  if(info){
+    info.textContent = 'Zoom '+Math.round(fotoZoom.escala*100)+'%';
+    info.classList.add('show');
+    clearTimeout(fotoZoomAplicar._t);
+    fotoZoomAplicar._t = setTimeout(function(){ info.classList.remove('show'); }, 1200);
+  }
+  img.classList.toggle('zoomed', fotoZoom.escala > 1);
+}
+
+function fotoZoomReset(){
+  fotoZoom = { escala: 1, x: 0, y: 0, arrastrando: false, iniX: 0, iniY: 0, iniPanX: 0, iniPanY: 0 };
+  fotoZoomAplicar();
+}
+
+function fotoZoomInit(){
+  var body = document.getElementById('foto-body');
+  var img  = document.getElementById('foto-img');
+  if(!body || !img || body._zoomInit) return;
+  body._zoomInit = true;
+
+  // ── Scroll del mouse: zoom in/out ──
+  body.addEventListener('wheel', function(e){
+    e.preventDefault();
+    var factor = e.deltaY < 0 ? 1.15 : 1/1.15;
+    var nuevaEscala = Math.max(1, Math.min(6, fotoZoom.escala * factor));
+    if(nuevaEscala === fotoZoom.escala) return;
+    fotoZoom.escala = nuevaEscala;
+    // Si vuelve a 1, resetear posición
+    if(fotoZoom.escala <= 1.001){ fotoZoom.x = 0; fotoZoom.y = 0; }
+    fotoZoomAplicar();
+  }, { passive: false });
+
+  // ── Arrastrar con click sostenido cuando hay zoom ──
+  img.addEventListener('mousedown', function(e){
+    if(fotoZoom.escala <= 1) return;
+    e.preventDefault();
+    fotoZoom.arrastrando = true;
+    fotoZoom.iniX = e.clientX;
+    fotoZoom.iniY = e.clientY;
+    fotoZoom.iniPanX = fotoZoom.x;
+    fotoZoom.iniPanY = fotoZoom.y;
+    img.classList.add('dragging');
+  });
+  window.addEventListener('mousemove', function(e){
+    if(!fotoZoom.arrastrando) return;
+    fotoZoom.x = fotoZoom.iniPanX + (e.clientX - fotoZoom.iniX);
+    fotoZoom.y = fotoZoom.iniPanY + (e.clientY - fotoZoom.iniY);
+    fotoZoomAplicar();
+  });
+  window.addEventListener('mouseup', function(){
+    if(fotoZoom.arrastrando){
+      fotoZoom.arrastrando = false;
+      img.classList.remove('dragging');
+    }
+  });
+
+  // ── Doble click: alterna zoom 100% ↔ 200% ──
+  img.addEventListener('dblclick', function(e){
+    e.preventDefault();
+    if(fotoZoom.escala > 1){ fotoZoomReset(); }
+    else { fotoZoom.escala = 2; fotoZoomAplicar(); }
+  });
+
+  // ── Touch: pinch-zoom en móvil ──
+  var touchIni = null;
+  body.addEventListener('touchstart', function(e){
+    if(e.touches.length === 2){
+      touchIni = {
+        d: Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY),
+        escala: fotoZoom.escala
+      };
+    }
+  });
+  body.addEventListener('touchmove', function(e){
+    if(e.touches.length === 2 && touchIni){
+      e.preventDefault();
+      var d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      fotoZoom.escala = Math.max(1, Math.min(6, touchIni.escala * (d / touchIni.d)));
+      if(fotoZoom.escala <= 1.001){ fotoZoom.x = 0; fotoZoom.y = 0; }
+      fotoZoomAplicar();
+    }
+  }, { passive: false });
+  body.addEventListener('touchend', function(){ touchIni = null; });
 }
 
 function setConsumo(modId, items){
