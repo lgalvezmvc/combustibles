@@ -2048,7 +2048,7 @@ let pendingQueue=[];
 // Cuando publiques una nueva versión, incrementa este número
 // y también el número en el archivo version.json del repo.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = '4.37';
+const APP_VERSION = '4.38';
 
 // URL del script de Apps Script
 const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbz-tOPyne_0D-AX6oa2ZP5q3omLZW_EBuQ8whXSk8zuDYzb3bq0F0qVe21eztHmoSsjLQ/exec';
@@ -4411,9 +4411,17 @@ async function generarPDF(){
 
         // Mostrar nivel + descarga + total si hay descarga
         if(descargaTxt){
-          // Parsear valores numéricos para sumar
-          var nivelNum    = parseFloat(nivelTxt.replace(/[^0-9.-]/g, '')) || 0;
-          var descargaNum = parseFloat(descargaTxt.replace(/[^0-9.-]/g, '')) || 0;
+          // Parsear valores numéricos: en formato chileno el "." es separador de miles
+          // Ej: "6.900 lts" → 6900,  "10.000 lts" → 10000
+          function parseChileno(txt){
+            // Quitar todo excepto dígitos, comas (decimales) y guión (negativos)
+            var limpio = String(txt).replace(/[^0-9,\-]/g, '');
+            // Cambiar coma decimal a punto
+            limpio = limpio.replace(',', '.');
+            return parseFloat(limpio) || 0;
+          }
+          var nivelNum    = parseChileno(nivelTxt);
+          var descargaNum = parseChileno(descargaTxt);
           var totalNum    = nivelNum + descargaNum;
           // Detectar si es porcentaje (gas)
           var esPct = nivelTxt.indexOf('%') > -1;
@@ -4422,7 +4430,7 @@ async function generarPDF(){
 
           nivelesFilas.push(['  '+e.lbl+' ('+e.cap+')', nivelTxt]);
           nivelesFilas.push(['     + Descarga del día', '+' + descargaTxt, [46,150,80]]);
-          nivelesFilas.push(['     = Total manejado', totalStr, [0, 80, 160]]);
+          nivelesFilas.push(['     = Nivel total del día', totalStr, [0, 80, 160]]);
         } else {
           nivelesFilas.push(['  '+e.lbl+' ('+e.cap+')', nivelTxt]);
         }
