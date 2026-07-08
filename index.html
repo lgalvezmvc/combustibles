@@ -2048,7 +2048,7 @@ let pendingQueue=[];
 // Cuando publiques una nueva versión, incrementa este número
 // y también el número en el archivo version.json del repo.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = '4.35';
+const APP_VERSION = '4.37';
 
 // URL del script de Apps Script
 const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbz-tOPyne_0D-AX6oa2ZP5q3omLZW_EBuQ8whXSk8zuDYzb3bq0F0qVe21eztHmoSsjLQ/exec';
@@ -4411,10 +4411,18 @@ async function generarPDF(){
 
         // Mostrar nivel + descarga + total si hay descarga
         if(descargaTxt){
-          // Calcular total: nivel medido es POST-descarga, así que el total disponible
-          // ya es el nivel medido. Mostramos explícitamente: nivel post-descarga
+          // Parsear valores numéricos para sumar
+          var nivelNum    = parseFloat(nivelTxt.replace(/[^0-9.-]/g, '')) || 0;
+          var descargaNum = parseFloat(descargaTxt.replace(/[^0-9.-]/g, '')) || 0;
+          var totalNum    = nivelNum + descargaNum;
+          // Detectar si es porcentaje (gas)
+          var esPct = nivelTxt.indexOf('%') > -1;
+          var unidad = esPct ? '%' : ' lts';
+          var totalStr = Math.round(totalNum).toLocaleString('es-CL') + unidad;
+
           nivelesFilas.push(['  '+e.lbl+' ('+e.cap+')', nivelTxt]);
-          nivelesFilas.push(['     ⬇ Descarga del día', '+'+descargaTxt, [46,150,80]]);
+          nivelesFilas.push(['     + Descarga del día', '+' + descargaTxt, [46,150,80]]);
+          nivelesFilas.push(['     = Total manejado', totalStr, [0, 80, 160]]);
         } else {
           nivelesFilas.push(['  '+e.lbl+' ('+e.cap+')', nivelTxt]);
         }
