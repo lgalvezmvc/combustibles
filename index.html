@@ -2048,7 +2048,7 @@ let pendingQueue=[];
 // Cuando publiques una nueva versión, incrementa este número
 // y también el número en el archivo version.json del repo.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = '4.34';
+const APP_VERSION = '4.35';
 
 // URL del script de Apps Script
 const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbz-tOPyne_0D-AX6oa2ZP5q3omLZW_EBuQ8whXSk8zuDYzb3bq0F0qVe21eztHmoSsjLQ/exec';
@@ -2360,7 +2360,7 @@ function abrirApp(){
   loadConfig(); initApp();
   // Aplicar permisos según rol
   aplicarPermisosUI();
-  // Iniciar timer de inactividad (auto-logout a los 20 min sin uso)
+  // Iniciar timer de inactividad (auto-logout a los 60 min sin uso)
   iniciarMonitorActividad();
 }
 
@@ -2524,7 +2524,7 @@ function doLogout(){
 }
 
 // ── Configuración de timeout de inactividad ─────────────────
-var INACTIVITY_TIMEOUT_MS = 20 * 60 * 1000; // 20 minutos
+var INACTIVITY_TIMEOUT_MS = 60 * 60 * 1000; // 60 minutos (1 hora)
 var inactivityTimerId = null;
 
 function resetInactivityTimer(){
@@ -2626,7 +2626,7 @@ function volverHome(){
 }
 
 // ═══════════════ NAV ═══════════════
-function goPage(id,tab){
+function goPage(id, tab, fromHistory){
   // Bloqueo: admin y usuarios solo accesibles para administradores
   if((id==='admin' || id==='usuarios') && (!CU || CU.role!=='admin')){
     showToast('⚠ Acceso solo para administradores','warn');
@@ -2645,10 +2645,100 @@ function goPage(id,tab){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  tab.classList.add('active');
+  if(tab && tab.classList) tab.classList.add('active');
   if(id==='dashboard') loadDashboard();
   if(id==='admin'){ admInit(); adjInit(); }
   if(id==='usuarios') cargarUsuariosDeSheets();
+
+  // Registrar navegación en historial (para interceptar botón atrás del móvil)
+  // fromHistory=true significa que venimos DE un popstate, no agregar entrada
+  if(!fromHistory){
+    try { history.pushState({ page: id }, '', '#'+id); } catch(e){}
+  }
+  currentPageId = id;
+}
+
+// Página actual (para el interceptor de "atrás")
+var currentPageId = null;
+
+// ═══════════════ INTERCEPTAR BOTÓN "ATRÁS" DEL MÓVIL ═══════════════
+// Verifica si hay datos sin guardar en el módulo actual
+function hayDatosSinGuardar(){
+  var pageId = currentPageId;
+  if(!pageId) return false;
+  // Solo módulos de ingreso pueden tener datos sin guardar
+  if(['isla','horno','reactivos','gascasino','gashorno'].indexOf(pageId) === -1
+     && pageId !== 'carga') return false;
+
+  // Chequear campos del módulo activo
+  var camposPorPagina = {
+    'isla':      ['i-cnt-d','i-cnt-g','i-med-d','i-med-g','i-obs'],
+    'horno':     ['h-med-d','h-med-k','h-obs'],
+    'reactivos': ['r-med-d','r-obs'],
+    'gascasino': ['gc-pct','gc-obs'],
+    'gashorno':  ['gh-pct','gh-obs'],
+    'carga':     ['c-comb','c-sector','c-nivel-antes','c-nivel-despues','c-obs']
+  };
+  var campos = camposPorPagina[pageId] || [];
+  for(var i = 0; i < campos.length; i++){
+    var el = document.getElementById(campos[i]);
+    if(el && el.value && String(el.value).trim() !== '') return true;
+  }
+  // También verificar si hay fotos capturadas
+  if(photos[pageId] && Object.keys(photos[pageId]).length > 0) return true;
+  if(pageId === 'carga' && Object.keys(cFotos).length > 0) return true;
+
+  return false;
+}
+
+// Escuchar el botón atrás del navegador/móvil
+window.addEventListener('popstate', function(e){
+  // Si estamos en splash/login, dejar comportamiento normal (salir)
+  if(!CU){ return; }
+
+  // Determinar a dónde ir
+  var destino = (e.state && e.state.page) ? e.state.page : 'home';
+
+  // Si estamos en home, permitir salir (no reinsertar entrada)
+  if(currentPageId === 'home' || currentPageId === null){
+    return;
+  }
+
+  // Si hay datos sin guardar, pedir confirmación
+  if(hayDatosSinGuardar()){
+    var confirmar = confirm(
+      '⚠ Tienes datos ingresados en este formulario.\n\n' +
+      '¿Salir sin guardar? Se perderán los datos y fotos capturadas.'
+    );
+    if(!confirmar){
+      // Usuario canceló: re-agregar la entrada al historial para no perder posición
+      history.pushState({ page: currentPageId }, '', '#'+currentPageId);
+      return;
+    }
+    // Confirmó: limpiar datos del formulario
+    clearMed(currentPageId);
+  }
+
+  // Navegar al destino
+  if(destino === 'home'){
+    goHome(true);
+  } else {
+    var tabId = 'tab-'+destino;
+    var tabEl = document.getElementById(tabId);
+    goPage(destino, tabEl, true);
+  }
+});
+
+// Versión de goHome que puede ser llamada desde popstate
+function goHome(fromHistory){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  var pgHome = document.getElementById('page-home');
+  if(pgHome) pgHome.classList.add('active');
+  currentPageId = 'home';
+  if(!fromHistory){
+    try { history.pushState({ page: 'home' }, '', '#home'); } catch(e){}
+  }
 }
 
 // ═══════════════ FECHAS ═══════════════
@@ -4186,6 +4276,7 @@ async function generarPDF(){
       pdf.setTextColor(255,255,255);
       pdf.setFont('helvetica','bold');
       pdf.setFontSize(12);
+      if(pdf.setCharSpace) pdf.setCharSpace(0);
       pdf.text(txt.toUpperCase(), margen+3, y+6.2);
       y += 12;
       pdf.setTextColor(0,0,0);
@@ -4336,6 +4427,7 @@ async function generarPDF(){
       pdf.setTextColor(255, 255, 255);
       pdf.setFont('helvetica','bold');
       pdf.setFontSize(10);
+      if(pdf.setCharSpace) pdf.setCharSpace(0);
       pdf.text(m.nombre.toUpperCase(), margen+3, y+4.8);
       y += 9;
 
@@ -4471,6 +4563,7 @@ async function generarPDF(){
       pdf.setTextColor(255, 165, 60);
       pdf.setFont('helvetica','bold');
       pdf.setFontSize(10);
+      if(pdf.setCharSpace) pdf.setCharSpace(0);
       pdf.text(combo.titulo, margen+3, y+4.8);
       y += 9;
       pdf.setTextColor(0,0,0);
@@ -4677,6 +4770,7 @@ async function generarPDF(){
         pdf.setTextColor(255, 165, 60);
         pdf.setFont('helvetica','bold');
         pdf.setFontSize(10);
+        if(pdf.setCharSpace) pdf.setCharSpace(0);
         pdf.text(s.nombre.toUpperCase(), margen+3, y+4.8);
         y += 9;
         pdf.setTextColor(0,0,0);
@@ -4715,15 +4809,18 @@ async function generarPDF(){
             catch(e){ item.dataUrl = null; }
           }));
 
-          // Subtítulo de la descarga
+          // Subtítulo de la descarga (ASCII puro para evitar problemas de renderizado)
           asegurarEspacio(10 + fotoH + labelAlto + 6);
           pdf.setFillColor(46, 150, 80);  // verde para descargas
           pdf.rect(margen, y, pageW - margen*2, 7, 'F');
           pdf.setTextColor(255, 255, 255);
           pdf.setFont('helvetica','bold');
           pdf.setFontSize(10);
+          // charSpace(0) para evitar letter-spacing residual entre generaciones
+          if(pdf.setCharSpace) pdf.setCharSpace(0);
           var volStr = Math.round(parseFloat(carga.vol_cargado)||0).toLocaleString('es-CL');
-          pdf.text('⬇ DESCARGA · '+nombreCarga.toUpperCase()+' · '+volStr+' lts', margen+3, y+4.8);
+          var txtDesc = 'DESCARGA - ' + nombreCarga.toUpperCase() + ' - ' + volStr + ' lts';
+          pdf.text(txtDesc, margen+3, y+4.8);
           y += 9;
           pdf.setTextColor(0,0,0);
 
