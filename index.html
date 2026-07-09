@@ -1720,12 +1720,34 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
             <option value="carga">⛽ Descarga de Combustible</option>
           </select>
         </div>
-        <div class="fg">
+        <div class="fg" id="adj-turno-wrap">
           <label>Turno (si aplica)</label>
           <select id="adj-turno">
             <option value="M">🌅 Mañana</option>
             <option value="T">☀️ Tarde</option>
             <option value="N">🌙 Noche</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Campos adicionales solo para módulo Descarga ─────── -->
+      <div class="fg2" id="adj-carga-wrap" style="grid-template-columns:1fr 1fr;margin-top:8px;display:none;">
+        <div class="fg">
+          <label>Sector de la descarga<span class="req">*</span></label>
+          <select id="adj-sector">
+            <option value="">Seleccionar...</option>
+            <option value="Isla Planta Alta">🏭 Isla Planta Alta</option>
+            <option value="Horno Planta Baja">🔥 Horno Planta Baja</option>
+            <option value="Reactivos Planta Alta">⚗️ Reactivos Planta Alta</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Combustible<span class="req">*</span></label>
+          <select id="adj-combustible">
+            <option value="">Seleccionar...</option>
+            <option value="Diesel">Diesel</option>
+            <option value="Gasolina">Gasolina</option>
+            <option value="Kerosene">Kerosene</option>
           </select>
         </div>
       </div>
@@ -2048,10 +2070,10 @@ let pendingQueue=[];
 // Cuando publiques una nueva versión, incrementa este número
 // y también el número en el archivo version.json del repo.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = '4.38';
+const APP_VERSION = '4.39';
 
 // URL del script de Apps Script
-const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbz-tOPyne_0D-AX6oa2ZP5q3omLZW_EBuQ8whXSk8zuDYzb3bq0F0qVe21eztHmoSsjLQ/exec';
+const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbwBoxNoYqnybRQ6BX7UQvPCMqQYSgP5GyInLUzbWLjywgSVAWgVjZznlGfPpSpoIlZVfA/exec';
 
 let SCRIPT_URL = SCRIPT_URL_DEFAULT;
 const ML={M:'Mañana',T:'Tarde',N:'Noche'}, MI={M:'🌅',T:'☀️',N:'🌙'};
@@ -5839,9 +5861,12 @@ function adjCambiarModulo(){
   sel.innerHTML = tipos.map(function(t){
     return '<option value="'+t.id+'">'+t.lbl+'</option>';
   }).join('');
-  // Ocultar selector de turno si es carga
-  var wrap = document.getElementById('adj-turno').parentElement;
-  if(wrap) wrap.style.display = (mod==='carga') ? 'none' : '';
+  // Mostrar/ocultar campos según módulo
+  var esCarga = (mod === 'carga');
+  var turnoWrap = document.getElementById('adj-turno-wrap');
+  var cargaWrap = document.getElementById('adj-carga-wrap');
+  if(turnoWrap) turnoWrap.style.display = esCarga ? 'none' : '';
+  if(cargaWrap) cargaWrap.style.display = esCarga ? 'grid' : 'none';
 }
 
 async function adjCapturarFoto(input){
@@ -5884,11 +5909,18 @@ async function adjSubirFoto(){
   var modulo = document.getElementById('adj-modulo').value;
   var turno  = document.getElementById('adj-turno').value;
   var tipo   = document.getElementById('adj-tipo-foto').value;
+  var sector      = document.getElementById('adj-sector').value;
+  var combustible = document.getElementById('adj-combustible').value;
   var res    = document.getElementById('adj-resultado');
   res.innerHTML = '';
 
   if(!fecha || !modulo || !tipo){
     res.innerHTML = '<span style="color:var(--red)">⚠ Completa fecha, módulo y tipo de foto</span>';
+    return;
+  }
+  // Para módulo carga: sector y combustible son obligatorios
+  if(modulo === 'carga' && (!sector || !combustible)){
+    res.innerHTML = '<span style="color:var(--red)">⚠ Para descargas: selecciona sector y combustible</span>';
     return;
   }
   if(!ADJ_FOTO_DATA){
@@ -5906,13 +5938,15 @@ async function adjSubirFoto(){
       method:'POST', mode:'no-cors',
       headers:{'Content-Type':'text/plain'},
       body: JSON.stringify({
-        action:    'adjuntarFotoHistorica',
-        fecha:     fecha,
-        modulo:    modulo,
-        turno:     turno || 'M',
-        tipo:      tipo,
-        foto_data: ADJ_FOTO_DATA,
-        usuario:   CU ? CU.name : 'admin'
+        action:      'adjuntarFotoHistorica',
+        fecha:       fecha,
+        modulo:      modulo,
+        turno:       turno || 'M',
+        tipo:        tipo,
+        sector:      sector,
+        combustible: combustible,
+        foto_data:   ADJ_FOTO_DATA,
+        usuario:     CU ? CU.name : 'admin'
       })
     });
     loadingHide();
