@@ -1389,6 +1389,19 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
   <div class="page" id="page-carga">
     <div class="dt">Fecha: <span class="db" id="hoy-carga"></span></div>
 
+    <!-- CARD RESUMEN DEL DÍA -->
+    <div class="card resumen-dia-card" id="resumen-carga" style="border-color:var(--blue);background:rgba(74,158,255,.04);">
+      <div class="ct" style="color:var(--blue);display:flex;justify-content:space-between;align-items:center;">
+        <span>📋 Descargas de hoy</span>
+        <button class="db-refresh" onclick="cargarResumenDia('carga', true)"
+                style="border-color:var(--blue);color:var(--blue);padding:4px 8px;font-size:11px;"
+                title="Refrescar">⟳</button>
+      </div>
+      <div id="resumen-body-carga" style="margin-top:8px;font-size:12px;line-height:1.7;">
+        <div style="color:var(--dim);font-style:italic;">Cargando...</div>
+      </div>
+    </div>
+
     <!-- Datos generales -->
     <div class="card">
       <div class="ct"><span class="dot gr"></span>Datos de la Carga</div>
@@ -2070,10 +2083,10 @@ let pendingQueue=[];
 // Cuando publiques una nueva versión, incrementa este número
 // y también el número en el archivo version.json del repo.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = '4.39';
+const APP_VERSION = '4.40';
 
 // URL del script de Apps Script
-const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbwBoxNoYqnybRQ6BX7UQvPCMqQYSgP5GyInLUzbWLjywgSVAWgVjZznlGfPpSpoIlZVfA/exec';
+const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycby0O41bnMb89hSJ7e91LmglJd4lrqvBulDYQ1OZldayB33rZDkigeGx6vtv7JzcypL0Eg/exec';
 
 let SCRIPT_URL = SCRIPT_URL_DEFAULT;
 const ML={M:'Mañana',T:'Tarde',N:'Noche'}, MI={M:'🌅',T:'☀️',N:'🌙'};
@@ -2214,7 +2227,9 @@ async function syncRecord(record){
     // ── PASO 1: enviar datos sin fotos ────────────────
     var recDatos = JSON.parse(JSON.stringify(record));
     recDatos.photos = {};
-    await postScript({ action:'addRecord', data: recDatos });
+    // Determinar acción: editRecord si el registro fue marcado como edición, sino addRecord
+    var accionApi = record.action === 'editRecord' ? 'editRecord' : 'addRecord';
+    await postScript({ action: accionApi, data: recDatos });
 
     // ── PASO 2: comprimir y enviar cada foto por separado ──
     var fotos = record.photos || {};
@@ -2671,6 +2686,10 @@ function goPage(id, tab, fromHistory){
   if(id==='dashboard') loadDashboard();
   if(id==='admin'){ admInit(); adjInit(); }
   if(id==='usuarios') cargarUsuariosDeSheets();
+  // Cargar resumen del día para módulos de ingreso
+  if(['isla','horno','reactivos','gascasino','gashorno','carga'].indexOf(id) > -1){
+    cargarResumenDia(id, false);
+  }
 
   // Registrar navegación en historial (para interceptar botón atrás del móvil)
   // fromHistory=true significa que venimos DE un popstate, no agregar entrada
@@ -3023,7 +3042,12 @@ async function submitMed(mod){
   if(mod==='gashorno')  med = gv('gh-med');
   if(!med){showToast('⚠ Seleccione Mañana, Tarde o Noche','warn');return;}
   const recs=getRecs(),today=todayISO();
-  if(recs.find(function(r){return r.module===mod&&r.date===today&&r.data&&r.data.med===med;})){
+
+  // Modo edición: si venimos de "editarRegistro" del resumen, actualizar en lugar de crear
+  var modoEdicion = window.__editandoRegistro && window.__editandoRegistro.modulo === mod;
+
+  // Solo verificar duplicado si NO estamos editando
+  if(!modoEdicion && recs.find(function(r){return r.module===mod&&r.date===today&&r.data&&r.data.med===med;})){
     showToast('⚠ Medición '+ML[med]+' ya registrada hoy para este módulo','warn');return;
   }
   // Armar datos según módulo
@@ -3104,9 +3128,14 @@ async function submitMed(mod){
       var rs=getRecs();
       var idx=rs.findIndex(function(x){return x.id===recId;});
       if(idx>=0){rs[idx].synced=true;saveRecs(rs);}
-      loadingUpdate('✔ Medición guardada', 'Sincronizado correctamente');
+      loadingUpdate('✔ Medición ' + (modoEdicion ? 'actualizada' : 'guardada'), 'Sincronizado correctamente');
       setTimeout(loadingHide, 600);
-      showToast('✔ '+MI[med]+' '+ML[med]+' guardado — '+mod);
+      showToast('✔ '+MI[med]+' '+ML[med]+' '+(modoEdicion?'actualizada':'guardado')+' — '+mod);
+      // Limpiar flag de edición
+      window.__editandoRegistro = null;
+      // Invalidar cache del resumen y refrescar
+      __resumenCache = {};
+      cargarResumenDia(mod, true);
     } else {
       loadingHide();
       showToast('⚠ Guardado local — sin conexión a Sheets','warn');
@@ -4885,6 +4914,7 @@ async function generarPDF(){
     loadingUpdate('✔ PDF descargado', nombreArchivo, 100);
     setTimeout(loadingHide, 800);
     showToast('✔ PDF descargado: '+nombreArchivo);
+    __resumenCache = {}; cargarResumenDia('carga', true);
 
   } catch(e) {
     console.error('Error generando PDF:', e);
@@ -5817,6 +5847,162 @@ function intentarParsearJSON(txt){
     try { return JSON.parse(match[0]); } catch(e){}
   }
   return null;
+}
+
+// ═══════════════ RESUMEN DE MEDICIONES DEL DÍA POR MÓDULO ═══════════════
+// Consulta el servidor con cache local de 2 minutos
+var __resumenCache = {};
+
+async function cargarResumenDia(modulo, forceRefresh){
+  var body = document.getElementById('resumen-body-' + modulo);
+  if(!body) return;
+
+  var hoy = todayISO();
+  var cacheKey = modulo + '_' + hoy;
+
+  // Usar cache si es reciente (< 2 min) y no se fuerza refresh
+  if(!forceRefresh){
+    var cache = __resumenCache[cacheKey];
+    if(cache && (Date.now() - cache.ts) < 120000){
+      renderResumenDia(modulo, cache.data);
+      return;
+    }
+  }
+
+  body.innerHTML = '<div style="color:var(--dim);font-style:italic;">Cargando...</div>';
+
+  if(!SCRIPT_URL){
+    body.innerHTML = '<div style="color:var(--dim);font-style:italic;">Sin conexión al servidor</div>';
+    return;
+  }
+
+  try {
+    var url = SCRIPT_URL + '?action=getMedicionesDia&modulo=' + modulo + '&fecha=' + hoy + '&_=' + Date.now();
+    var resp = await fetch(url, { cache: 'no-store' });
+    var txt = await resp.text();
+    var json = JSON.parse(txt);
+    if(json.ok){
+      __resumenCache[cacheKey] = { data: json.data, ts: Date.now() };
+      renderResumenDia(modulo, json.data);
+    } else {
+      body.innerHTML = '<div style="color:var(--red);">⚠ ' + (json.error||'Error al cargar') + '</div>';
+    }
+  } catch(e){
+    body.innerHTML = '<div style="color:var(--dim);font-style:italic;">Sin conexión — no se pudo cargar el resumen</div>';
+  }
+}
+
+function renderResumenDia(modulo, registros){
+  var body = document.getElementById('resumen-body-' + modulo);
+  if(!body) return;
+
+  if(!registros || registros.length === 0){
+    body.innerHTML = '<div style="color:var(--dim);font-style:italic;padding:6px 0;">Sin registros hoy — sé el primero en medir 🌅</div>';
+    return;
+  }
+
+  var esCarga = (modulo === 'carga');
+  var html = '';
+
+  if(esCarga){
+    // Renderizar descargas
+    registros.forEach(function(r){
+      var hora = formatearHora(r.timestamp || r.fecha);
+      var usuario = r.usuario || '—';
+      var puedoEditar = (CU && (CU.role === 'admin' || CU.name === usuario));
+      html += '<div style="padding:6px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="color:var(--descarga);font-weight:700;">✔ ' + hora + ' · ' + (r.combustible||'') + ' → ' + (r.sector||'') + '</div>' +
+          '<div style="color:var(--dim);font-size:11px;">' + Math.round(parseFloat(r.vol_cargado)||0).toLocaleString('es-CL') + ' lts · Registrado por ' + usuario + '</div>' +
+        '</div>' +
+        (puedoEditar ? '<button onclick="editarRegistro(\''+modulo+'\',\''+ (r.id||'') +'\')" style="background:var(--s2);border:1px solid var(--border);color:var(--accent);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;" title="Editar">✏</button>' : '') +
+      '</div>';
+    });
+  } else {
+    // Renderizar mediciones por turno
+    var turnos = { M: { emoji:'🌅', nombre:'Mañana' }, T: { emoji:'☀️', nombre:'Tarde' }, N: { emoji:'🌙', nombre:'Noche' } };
+    var registroPorTurno = {};
+    registros.forEach(function(r){
+      var t = (r.medicion || 'M').toUpperCase();
+      registroPorTurno[t] = r;
+    });
+
+    ['M','T','N'].forEach(function(t){
+      var info = turnos[t];
+      var r = registroPorTurno[t];
+      if(r){
+        var hora = formatearHora(r.timestamp || r.fecha);
+        var usuario = r.usuario || '—';
+        var puedoEditar = (CU && (CU.role === 'admin' || CU.name === usuario));
+        // Construir línea de valores por módulo
+        var valores = construirValoresResumen(modulo, r);
+        html += '<div style="padding:6px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div style="color:var(--green);font-weight:700;">✔ ' + info.emoji + ' ' + info.nombre + ' — ' + hora + '</div>' +
+            (valores ? '<div style="color:var(--text);font-size:11px;">' + valores + '</div>' : '') +
+            '<div style="color:var(--dim);font-size:11px;">Registrado por ' + usuario + '</div>' +
+          '</div>' +
+          (puedoEditar ? '<button onclick="editarRegistro(\''+modulo+'\',\''+ (r.id||'') +'\')" style="background:var(--s2);border:1px solid var(--border);color:var(--accent);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;" title="Editar">✏</button>' : '') +
+        '</div>';
+      } else {
+        html += '<div style="padding:6px 0;border-bottom:1px solid var(--border);color:var(--dim);">' +
+          '⚪ ' + info.emoji + ' ' + info.nombre + ' — pendiente' +
+        '</div>';
+      }
+    });
+  }
+
+  body.innerHTML = html;
+}
+
+// Construir string de valores principales según el módulo
+function construirValoresResumen(modulo, r){
+  function fmt(v, u){ if(v === '' || v === null || v === undefined || isNaN(parseFloat(v))) return ''; return Math.round(parseFloat(v)).toLocaleString('es-CL') + (u||''); }
+  var partes = [];
+  if(modulo === 'isla'){
+    if(r.est_diesel)   partes.push('Diesel ' + fmt(r.est_diesel, ' lts'));
+    if(r.est_gasolina) partes.push('Gasolina ' + fmt(r.est_gasolina, ' lts'));
+    if(r.gas_pct)      partes.push('Gas ' + fmt(r.gas_pct, '%'));
+  } else if(modulo === 'horno'){
+    if(r.est_diesel)   partes.push('Diesel ' + fmt(r.est_diesel, ' lts'));
+    if(r.est_kerosene) partes.push('Kerosene ' + fmt(r.est_kerosene, ' lts'));
+    if(r.gas_pct)      partes.push('Gas ' + fmt(r.gas_pct, '%'));
+  } else if(modulo === 'reactivos'){
+    if(r.est_diesel)   partes.push('Diesel ' + fmt(r.est_diesel, ' lts'));
+  } else if(modulo === 'gascasino' || modulo === 'gashorno'){
+    if(r.gas_pct)      partes.push('Nivel ' + fmt(r.gas_pct, '%'));
+  }
+  return partes.join(' · ');
+}
+
+// Formatear timestamp/fecha a "HH:MM"
+function formatearHora(ts){
+  if(!ts) return '—';
+  try {
+    var d = new Date(ts);
+    if(isNaN(d.getTime())) return '—';
+    return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  } catch(e){ return '—'; }
+}
+
+// Editar registro: solo el operario que lo creó o admin
+function editarRegistro(modulo, id){
+  if(!id){
+    showToast('⚠ ID de registro no disponible','warn');
+    return;
+  }
+  if(!confirm('¿Editar este registro? Podrás corregir valores desde la última medición sin guardar.')){
+    return;
+  }
+  // Marcar en flag global que estamos en modo edición
+  window.__editandoRegistro = { modulo: modulo, id: id };
+  showToast('✏ Modo edición activo. Modifica los campos y guarda para actualizar.', 'ok');
+  // Scroll hacia arriba al formulario
+  setTimeout(function(){
+    var pageEl = document.getElementById('page-' + modulo);
+    if(pageEl) pageEl.scrollTop = 0;
+    window.scrollTo({ top: 200, behavior: 'smooth' });
+  }, 200);
 }
 
 // ═══════════════ ADJUNTAR FOTOS A REGISTROS HISTÓRICOS ═══════════════
