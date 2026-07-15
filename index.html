@@ -2083,7 +2083,7 @@ let pendingQueue=[];
 // Cuando publiques una nueva versión, incrementa este número
 // y también el número en el archivo version.json del repo.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = '4.40';
+const APP_VERSION = '4.41';
 
 // URL del script de Apps Script
 const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycby0O41bnMb89hSJ7e91LmglJd4lrqvBulDYQ1OZldayB33rZDkigeGx6vtv7JzcypL0Eg/exec';
@@ -3604,7 +3604,7 @@ function renderTanks(data){
       'ORPAK':             i.foto_orpak || '',
       'Contador Diesel':   i.foto_cnt_diesel || '',
       'Contador Gasolina': i.foto_cnt_gasolina || '',
-      'Reloj Gas':         i.foto_gas || '',
+      'Reloj Gas Casino':  i.foto_gas || '',   // viene de hoja Gas_Casino vía leerGasFoto (o fallback col isla)
       'Med. Diesel':       i.foto_diesel || i.foto_url || '',
       'Med. Gasolina':     i.foto_gasolina || ''
     };
@@ -3627,11 +3627,11 @@ function renderTanks(data){
     window.dashAllFotos.horno = {
       'Sector':              h.foto_sector || '',
       'Surtidor Diesel':     h.foto_surt_diesel || '',
-      'Surtidor Gasolina':   h.foto_surt_gasolina || '',
+      'Surtidor Kerosene':   h.foto_surt_gasolina || '',  // col original tenía nombre "gasolina" pero es kerosene
       'ORPAK':               h.foto_orpak || '',
       'Med. Diesel':         h.foto_diesel || '',
-      'Med. Kerosene':       h.foto_kerosene || ''
-      // Nota: Reloj Gas Licuado no se almacena (sin columna en la hoja)
+      'Med. Kerosene':       h.foto_kerosene || '',
+      'Reloj Gas Horno':     h.foto_gas || ''  // viene de hoja Gas_Horno vía leerGasFoto
     };
     setConsumo('horno',[
       buildConsumoItem('Diesel',   h.consumo_diesel,   'diesel'),
@@ -6020,7 +6020,7 @@ var ADJ_TIPOS_FOTOS = {
   'horno':     [
     {id:'foto_sector',        lbl:'Foto del Sector'},
     {id:'foto_surt_diesel',   lbl:'Surtidor Diesel'},
-    {id:'foto_surt_gasolina', lbl:'Surtidor Gasolina'},
+    {id:'foto_surt_gasolina', lbl:'Surtidor Kerosene'},  // columna en Sheets se llama gasolina pero es kerosene
     {id:'foto_orpak',         lbl:'ORPAK'},
     {id:'foto_med_diesel',    lbl:'Medición Diesel'},
     {id:'foto_med_kerosene',  lbl:'Medición Kerosene'}
