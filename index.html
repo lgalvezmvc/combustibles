@@ -2083,10 +2083,10 @@ let pendingQueue=[];
 // Cuando publiques una nueva versión, incrementa este número
 // y también el número en el archivo version.json del repo.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = '4.41';
+const APP_VERSION = '4.42';
 
 // URL del script de Apps Script
-const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycby0O41bnMb89hSJ7e91LmglJd4lrqvBulDYQ1OZldayB33rZDkigeGx6vtv7JzcypL0Eg/exec';
+const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxx2S1lpVQZ2usUsK2xFxNczOcrrK8cU1XFv-Op3541vKgYcFCxlF9-ZPIzYGePSPLshQ/exec';
 
 let SCRIPT_URL = SCRIPT_URL_DEFAULT;
 const ML={M:'Mañana',T:'Tarde',N:'Noche'}, MI={M:'🌅',T:'☀️',N:'🌙'};
@@ -4460,28 +4460,28 @@ async function generarPDF(){
 
         if (nivelTxt && nivelTxt !== '—' && nivelTxt !== '') hayDatos = true;
 
-        // Mostrar nivel + descarga + total si hay descarga
+        // Mostrar nivel + descarga + nivel inicial si hay descarga
+        // Interpretación: el nivel medido es POST-descarga (después de que llegó el proveedor)
+        // Fórmula: Nivel inicial del día = Nivel medido - Descarga
         if(descargaTxt){
           // Parsear valores numéricos: en formato chileno el "." es separador de miles
           // Ej: "6.900 lts" → 6900,  "10.000 lts" → 10000
           function parseChileno(txt){
-            // Quitar todo excepto dígitos, comas (decimales) y guión (negativos)
             var limpio = String(txt).replace(/[^0-9,\-]/g, '');
-            // Cambiar coma decimal a punto
             limpio = limpio.replace(',', '.');
             return parseFloat(limpio) || 0;
           }
           var nivelNum    = parseChileno(nivelTxt);
           var descargaNum = parseChileno(descargaTxt);
-          var totalNum    = nivelNum + descargaNum;
+          var inicialNum  = nivelNum - descargaNum; // nivel antes de que llegara la descarga
           // Detectar si es porcentaje (gas)
           var esPct = nivelTxt.indexOf('%') > -1;
           var unidad = esPct ? '%' : ' lts';
-          var totalStr = Math.round(totalNum).toLocaleString('es-CL') + unidad;
+          var inicialStr = Math.round(inicialNum).toLocaleString('es-CL') + unidad;
 
           nivelesFilas.push(['  '+e.lbl+' ('+e.cap+')', nivelTxt]);
           nivelesFilas.push(['     + Descarga del día', '+' + descargaTxt, [46,150,80]]);
-          nivelesFilas.push(['     = Nivel total del día', totalStr, [0, 80, 160]]);
+          nivelesFilas.push(['     = Nivel inicial del día', inicialStr, [0, 80, 160]]);
         } else {
           nivelesFilas.push(['  '+e.lbl+' ('+e.cap+')', nivelTxt]);
         }
