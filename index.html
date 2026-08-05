@@ -2083,10 +2083,10 @@ let pendingQueue=[];
 // Cuando publiques una nueva versión, incrementa este número
 // y también el número en el archivo version.json del repo.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = '4.42';
+const APP_VERSION = '4.44';
 
 // URL del script de Apps Script
-const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxx2S1lpVQZ2usUsK2xFxNczOcrrK8cU1XFv-Op3541vKgYcFCxlF9-ZPIzYGePSPLshQ/exec';
+const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbwUxMjyBng1dY9pdIyQpf2PLb2h9au851V9J69RxAcvC2qTO2ls15kbrpPJ8D_6JAh6mA/exec';
 
 let SCRIPT_URL = SCRIPT_URL_DEFAULT;
 const ML={M:'Mañana',T:'Tarde',N:'Noche'}, MI={M:'🌅',T:'☀️',N:'🌙'};
@@ -3275,6 +3275,23 @@ function dashIrHoy(){
 var __dashReqId = 0;
 
 async function loadDashboard(forceRefresh){
+  // Auto-limpiar cargas locales viejas que ya deberían estar en Sheets
+  // (evita que sigan sumándose al dashboard indefinidamente)
+  try {
+    var ahora = Date.now();
+    var recs = getRecs();
+    var limpias = recs.filter(function(r){
+      if(r.module !== 'carga') return true;
+      var edad = ahora - new Date(r.createdAt || r.date).getTime();
+      // Cargas > 24h de antigüedad: asumir sincronizadas
+      return edad < 24*3600*1000;
+    });
+    if(limpias.length < recs.length){
+      console.log('[Limpieza] Removidas', recs.length - limpias.length, 'cargas locales antiguas');
+      saveRecs(limpias);
+    }
+  } catch(e){}
+
   // Generar un ID único para esta petición y guardarlo como "última válida"
   var myReqId = ++__dashReqId;
   var noCache = forceRefresh === true;
@@ -3429,7 +3446,38 @@ function enriquecerConCargas(data){
   var cargasLocal = recs.filter(function(r){ return r.module==='carga' && !r.synced; });
 
   if(cargasLocal.length > 0){
-    function sumarPendientes(nivelBase, extraBase, sectorNombre, combustible, fechaMed){
+// Solo sumar cargas locales si el backend NO las ha procesado ya.
+    // Comparamos el volumen local contra la descarga_* del backend.
+    // Si coinciden aproximadamente, la carga ya fue procesada por el backend
+    // y NO debe sumarse otra vez al nivel medido.
+    if(d.isla){
+      var f=normFecha(d.isla.fecha);
+      var descBackendD = parseFloat(d.isla.descarga_diesel)   || 0;
+      var descBackendG = parseFloat(d.isla.descarga_gasolina) || 0;
+      var rD=sumarPendientesSeguro(d.isla.diesel_lts,   d.isla.diesel_extra||0,   'Isla Planta Alta','Diesel',   f, descBackendD);
+      var rG=sumarPendientesSeguro(d.isla.gasolina_lts, d.isla.gasolina_extra||0, 'Isla Planta Alta','Gasolina', f, descBackendG);
+      d.isla.diesel_lts=rD.nivel;   d.isla.diesel_extra=rD.totalCargado;
+      d.isla.gasolina_lts=rG.nivel; d.isla.gasolina_extra=rG.totalCargado;
+    }
+    if(d.horno){
+      var f=normFecha(d.horno.fecha);
+      var descBackendD = parseFloat(d.horno.descarga_diesel)   || 0;
+      var descBackendK = parseFloat(d.horno.descarga_kerosene) || 0;
+      var rD=sumarPendientesSeguro(d.horno.diesel_lts,   d.horno.diesel_extra||0,   'Horno Planta Baja','Diesel',   f, descBackendD);
+      var rK=sumarPendientesSeguro(d.horno.kerosene_lts, d.horno.kerosene_extra||0, 'Horno Planta Baja','Kerosene', f, descBackendK);
+      d.horno.diesel_lts=rD.nivel;   d.horno.diesel_extra=rD.totalCargado;
+      d.horno.kerosene_lts=rK.nivel; d.horno.kerosene_extra=rK.totalCargado;
+    }
+    if(d.reactivos){
+      var f=normFecha(d.reactivos.fecha);
+      var descBackendR = parseFloat(d.reactivos.descarga_diesel) || 0;
+      var rD=sumarPendientesSeguro(d.reactivos.diesel_lts, d.reactivos.diesel_extra||0, 'Reactivos Planta Alta','Diesel', f, descBackendR);
+      d.reactivos.diesel_lts=rD.nivel; d.reactivos.diesel_extra=rD.totalCargado;
+    }
+
+    // Función que decide si sumar una carga local basándose en si el backend
+    // ya la contabilizó (evita doble suma)
+    function sumarPendientesSeguro(nivelBase, extraBase, sectorNombre, combustible, fechaMed, descBackend){
       var fechaNorm = normFecha(fechaMed);
       var total = extraBase || 0;
       cargasLocal.forEach(function(r){
@@ -3442,30 +3490,17 @@ function enriquecerConCargas(data){
           var an=parseFloat(r.data.an_lts)||0, de=parseFloat(r.data.de_lts)||0;
           vol = de>an ? de-an : 0;
         }
+        // ⚠ Si el backend YA reporta esta descarga en descarga_*, no sumar
+        // (la carga ya está reflejada tanto en el nivel medido como en el descarga_)
+        if(descBackend && Math.abs(descBackend - vol) < 100){
+          console.log('[sumarPendientes] Carga local YA está en backend — NO se suma:', combustible, vol);
+          return;
+        }
+        console.log('[sumarPendientes] Sumando carga local pendiente:', combustible, vol);
         total += vol;
         nivelBase += vol;
       });
       return { nivel: nivelBase, totalCargado: total };
-    }
-
-    if(d.isla){
-      var f=normFecha(d.isla.fecha);
-      var rD=sumarPendientes(d.isla.diesel_lts,   d.isla.diesel_extra||0,   'Isla Planta Alta','Diesel',   f);
-      var rG=sumarPendientes(d.isla.gasolina_lts, d.isla.gasolina_extra||0, 'Isla Planta Alta','Gasolina', f);
-      d.isla.diesel_lts=rD.nivel;   d.isla.diesel_extra=rD.totalCargado;
-      d.isla.gasolina_lts=rG.nivel; d.isla.gasolina_extra=rG.totalCargado;
-    }
-    if(d.horno){
-      var f=normFecha(d.horno.fecha);
-      var rD=sumarPendientes(d.horno.diesel_lts,   d.horno.diesel_extra||0,   'Horno Planta Baja','Diesel',   f);
-      var rK=sumarPendientes(d.horno.kerosene_lts, d.horno.kerosene_extra||0, 'Horno Planta Baja','Kerosene', f);
-      d.horno.diesel_lts=rD.nivel;   d.horno.diesel_extra=rD.totalCargado;
-      d.horno.kerosene_lts=rK.nivel; d.horno.kerosene_extra=rK.totalCargado;
-    }
-    if(d.reactivos){
-      var f=normFecha(d.reactivos.fecha);
-      var rD=sumarPendientes(d.reactivos.diesel_lts, d.reactivos.diesel_extra||0, 'Reactivos Planta Alta','Diesel', f);
-      d.reactivos.diesel_lts=rD.nivel; d.reactivos.diesel_extra=rD.totalCargado;
     }
   }
 
@@ -4460,9 +4495,7 @@ async function generarPDF(){
 
         if (nivelTxt && nivelTxt !== '—' && nivelTxt !== '') hayDatos = true;
 
-        // Mostrar nivel + descarga + nivel inicial si hay descarga
-        // Interpretación: el nivel medido es POST-descarga (después de que llegó el proveedor)
-        // Fórmula: Nivel inicial del día = Nivel medido - Descarga
+        // Mostrar nivel + descarga + total si hay descarga
         if(descargaTxt){
           // Parsear valores numéricos: en formato chileno el "." es separador de miles
           // Ej: "6.900 lts" → 6900,  "10.000 lts" → 10000
@@ -4473,15 +4506,15 @@ async function generarPDF(){
           }
           var nivelNum    = parseChileno(nivelTxt);
           var descargaNum = parseChileno(descargaTxt);
-          var inicialNum  = nivelNum - descargaNum; // nivel antes de que llegara la descarga
+          var totalNum    = nivelNum + descargaNum;
           // Detectar si es porcentaje (gas)
           var esPct = nivelTxt.indexOf('%') > -1;
           var unidad = esPct ? '%' : ' lts';
-          var inicialStr = Math.round(inicialNum).toLocaleString('es-CL') + unidad;
+          var totalStr = Math.round(totalNum).toLocaleString('es-CL') + unidad;
 
           nivelesFilas.push(['  '+e.lbl+' ('+e.cap+')', nivelTxt]);
           nivelesFilas.push(['     + Descarga del día', '+' + descargaTxt, [46,150,80]]);
-          nivelesFilas.push(['     = Nivel inicial del día', inicialStr, [0, 80, 160]]);
+          nivelesFilas.push(['     = Nivel total del día', totalStr, [0, 80, 160]]);
         } else {
           nivelesFilas.push(['  '+e.lbl+' ('+e.cap+')', nivelTxt]);
         }
