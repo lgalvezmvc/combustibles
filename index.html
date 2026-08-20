@@ -1279,27 +1279,27 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
     <div class="card">
       <div class="ct"><span class="dot a"></span>Fotografías — Isla Planta Alta</div>
       <div class="pgrid">
-        <div class="pi"><div class="pl">Sector Isla</div><div class="pc" id="ph-isla-sector"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'isla','sector')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','sector')">✕</button></div></div>
-        <div class="pi"><div class="pl">Surtidor</div><div class="pc" id="ph-isla-surtidor"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'isla','surtidor')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','surtidor')">✕</button></div></div>
-        <div class="pi"><div class="pl">ORPAK</div><div class="pc" id="ph-isla-orpak"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'isla','orpak')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','orpak')">✕</button></div></div>
-        <div class="pi"><div class="pl">Cnt. Diesel</div><div class="pc" id="ph-isla-cnt-diesel"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'isla','cnt_diesel')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','cnt_diesel')">✕</button></div></div>
-        <div class="pi"><div class="pl">Cnt. Gasolina</div><div class="pc" id="ph-isla-cnt-gasolina"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'isla','cnt_gasolina')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','cnt_gasolina')">✕</button></div></div>
+        <div class="pi"><div class="pl">Sector Isla</div><div class="pc" id="ph-isla-sector"><input type="file" accept="image/*" onchange="capP(this,'isla','sector')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','sector')">✕</button></div></div>
+        <div class="pi"><div class="pl">Surtidor</div><div class="pc" id="ph-isla-surtidor"><input type="file" accept="image/*" onchange="capP(this,'isla','surtidor')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','surtidor')">✕</button></div></div>
+        <div class="pi"><div class="pl">ORPAK</div><div class="pc" id="ph-isla-orpak"><input type="file" accept="image/*" onchange="capP(this,'isla','orpak')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','orpak')">✕</button></div></div>
+        <div class="pi"><div class="pl">Cnt. Diesel</div><div class="pc" id="ph-isla-cnt-diesel"><input type="file" accept="image/*" onchange="capP(this,'isla','cnt_diesel')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','cnt_diesel')">✕</button></div></div>
+        <div class="pi"><div class="pl">Cnt. Gasolina</div><div class="pc" id="ph-isla-cnt-gasolina"><input type="file" accept="image/*" onchange="capP(this,'isla','cnt_gasolina')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','cnt_gasolina')">✕</button></div></div>
         
-        <div class="pi"><div class="pl">Med. Diesel</div><div class="pc" id="ph-isla-med-diesel"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'isla','med_diesel')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','med_diesel')">✕</button></div></div>
-        <div class="pi"><div class="pl">Med. Gasolina</div><div class="pc" id="ph-isla-med-gasolina"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'isla','med_gasolina')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','med_gasolina')">✕</button></div></div>
+        <div class="pi"><div class="pl">Med. Diesel</div><div class="pc" id="ph-isla-med-diesel"><input type="file" accept="image/*" onchange="capP(this,'isla','med_diesel')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','med_diesel')">✕</button></div></div>
+        <div class="pi"><div class="pl">Med. Gasolina</div><div class="pc" id="ph-isla-med-gasolina"><input type="file" accept="image/*" onchange="capP(this,'isla','med_gasolina')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'isla','med_gasolina')">✕</button></div></div>
       </div>
     </div>
     <div class="card">
       <div class="ct"><span class="dot d"></span>Diesel</div>
       <div class="fg2">
-        <div class="fg"><label>Contador Diesel<span class="req">*</span></label><input type="number" id="i-cnt-d" placeholder="0.00" step="0.01" required class="required-field"></div>
+        <div class="fg"><label>Contador Diesel<span class="req">*</span></label><input type="text" id="i-cnt-d" placeholder="0,00" inputmode="decimal" required class="required-field" oninput="formatDecimalComa(this)"></div>
         <div class="fg"><label>Est. Diesel (lts)<span class="req">*</span> <span class="cap-lbl">máx 20.000</span></label><input type="number" id="i-med-d" placeholder="0" min="0" max="20000" required class="required-field" oninput="chkCap(this,20000)"><div class="cap-bar-wrap"><div class="cap-bar" id="cap-i-med-d"></div></div></div>
       </div>
     </div>
     <div class="card">
       <div class="ct"><span class="dot g"></span>Gasolina</div>
       <div class="fg2">
-        <div class="fg"><label>Contador Gasolina<span class="req">*</span></label><input type="number" id="i-cnt-g" placeholder="0.00" step="0.01" required class="required-field"></div>
+        <div class="fg"><label>Contador Gasolina<span class="req">*</span></label><input type="text" id="i-cnt-g" placeholder="0,00" inputmode="decimal" required class="required-field" oninput="formatDecimalComa(this)"></div>
         <div class="fg"><label>Est. Gasolina (lts)<span class="req">*</span> <span class="cap-lbl">máx 20.000</span></label><input type="number" id="i-med-g" placeholder="0" min="0" max="20000" required class="required-field" oninput="chkCap(this,20000)"><div class="cap-bar-wrap"><div class="cap-bar" id="cap-i-med-g"></div></div></div>
       </div>
     </div>
@@ -1331,12 +1331,12 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
     <div class="card">
       <div class="ct"><span class="dot a"></span>Fotografías — Horno Planta Baja</div>
       <div class="pgrid">
-        <div class="pi"><div class="pl">Sector Horno</div><div class="pc" id="ph-horno-sector"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'horno','sector')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'horno','sector')">✕</button></div></div>
-        <div class="pi"><div class="pl">Surt. Diesel</div><div class="pc" id="ph-horno-surt-diesel"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'horno','surt_diesel')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'horno','surt_diesel')">✕</button></div></div>
-        <div class="pi"><div class="pl">Surt. Kerosene</div><div class="pc" id="ph-horno-surt-kerosene"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'horno','surt_kerosene')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'horno','surt_kerosene')">✕</button></div></div>
-        <div class="pi"><div class="pl">ORPAK</div><div class="pc" id="ph-horno-orpak"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'horno','orpak')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'horno','orpak')">✕</button></div></div>
-        <div class="pi"><div class="pl">Med. Diesel</div><div class="pc" id="ph-horno-med-diesel"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'horno','med_diesel')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'horno','med_diesel')">✕</button></div></div>
-        <div class="pi"><div class="pl">Med. Kerosene</div><div class="pc" id="ph-horno-med-kerosene"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'horno','med_kerosene')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'horno','med_kerosene')">✕</button></div></div>
+        <div class="pi"><div class="pl">Sector Horno</div><div class="pc" id="ph-horno-sector"><input type="file" accept="image/*" onchange="capP(this,'horno','sector')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'horno','sector')">✕</button></div></div>
+        <div class="pi"><div class="pl">Surt. Diesel</div><div class="pc" id="ph-horno-surt-diesel"><input type="file" accept="image/*" onchange="capP(this,'horno','surt_diesel')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'horno','surt_diesel')">✕</button></div></div>
+        <div class="pi"><div class="pl">Surt. Kerosene</div><div class="pc" id="ph-horno-surt-kerosene"><input type="file" accept="image/*" onchange="capP(this,'horno','surt_kerosene')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'horno','surt_kerosene')">✕</button></div></div>
+        <div class="pi"><div class="pl">ORPAK</div><div class="pc" id="ph-horno-orpak"><input type="file" accept="image/*" onchange="capP(this,'horno','orpak')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'horno','orpak')">✕</button></div></div>
+        <div class="pi"><div class="pl">Med. Diesel</div><div class="pc" id="ph-horno-med-diesel"><input type="file" accept="image/*" onchange="capP(this,'horno','med_diesel')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'horno','med_diesel')">✕</button></div></div>
+        <div class="pi"><div class="pl">Med. Kerosene</div><div class="pc" id="ph-horno-med-kerosene"><input type="file" accept="image/*" onchange="capP(this,'horno','med_kerosene')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'horno','med_kerosene')">✕</button></div></div>
 
       </div>
     </div>
@@ -1374,7 +1374,7 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
     <div class="card">
       <div class="ct"><span class="dot k"></span>Fotografía</div>
       <div class="pgrid" style="grid-template-columns:1fr 1fr">
-        <div class="pi"><div class="pl">Med. Diesel</div><div class="pc" id="ph-reactivos-med-diesel"><input type="file" accept="image/*" capture="environment" onchange="capP(this,'reactivos','med_diesel')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'reactivos','med_diesel')">✕</button></div></div>
+        <div class="pi"><div class="pl">Med. Diesel</div><div class="pc" id="ph-reactivos-med-diesel"><input type="file" accept="image/*" onchange="capP(this,'reactivos','med_diesel')"><div class="pico">📷</div><div class="phi">Foto</div><button class="prm" onclick="remP(event,'reactivos','med_diesel')">✕</button></div></div>
       </div>
     </div>
     <div class="card">
@@ -1439,7 +1439,7 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
       <div class="pgrid" style="grid-template-columns:1fr">
         <div class="pi">
           <div class="pl">Foto Guía / Documento</div>
-          <div class="pc" id="ph-c-guia"><input type="file" accept="image/*" capture="environment" onchange="capC(this,'guia')"><div class="pico">📄</div><div class="phi">Fotografiar la guía de despacho</div><button class="prm" onclick="remC(event,'guia')">✕</button></div>
+          <div class="pc" id="ph-c-guia"><input type="file" accept="image/*" onchange="capC(this,'guia')"><div class="pico">📄</div><div class="phi">Fotografiar la guía de despacho</div><button class="prm" onclick="remC(event,'guia')">✕</button></div>
         </div>
       </div>
     </div>
@@ -1450,7 +1450,7 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
       <div style="margin-bottom:10px">
         <div class="ba-lbl an" style="margin-bottom:8px">📸 Foto Estanque Antes</div>
         <div class="pclg" id="ph-c-an-med">
-          <input type="file" accept="image/*" capture="environment" onchange="capC(this,'an_med')">
+          <input type="file" accept="image/*" onchange="capC(this,'an_med')">
           <div class="pico" style="font-size:30px">📷</div>
           <div class="phi">Nivel del estanque<br><strong>ANTES</strong> de la carga</div>
           <button class="prm" onclick="remC(event,'an_med')">✕</button>
@@ -1467,7 +1467,7 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
       <div style="margin-bottom:10px">
         <div class="ba-lbl de" style="margin-bottom:8px">📸 Foto Estanque Después</div>
         <div class="pclg" id="ph-c-de-med">
-          <input type="file" accept="image/*" capture="environment" onchange="capC(this,'de_med')">
+          <input type="file" accept="image/*" onchange="capC(this,'de_med')">
           <div class="pico" style="font-size:30px">📷</div>
           <div class="phi">Nivel del estanque<br><strong>DESPUÉS</strong> de la carga</div>
           <button class="prm" onclick="remC(event,'de_med')">✕</button>
@@ -1526,7 +1526,7 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
       <div class="pi" style="margin-top:8px;">
         <div class="pl">Reloj Gas Casino</div>
         <div class="pc" id="ph-gascasino-reloj">
-          <input type="file" accept="image/*" capture="environment" onchange="capP(this,'gascasino','reloj')">
+          <input type="file" accept="image/*" onchange="capP(this,'gascasino','reloj')">
           <div class="pico">📷</div>
           <div class="phi">Foto</div>
           <button class="prm" onclick="remP(event,'gascasino','reloj')">✕</button>
@@ -1572,7 +1572,7 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
       <div class="pi" style="margin-top:8px;">
         <div class="pl">Reloj Gas Horno</div>
         <div class="pc" id="ph-gashorno-reloj">
-          <input type="file" accept="image/*" capture="environment" onchange="capP(this,'gashorno','reloj')">
+          <input type="file" accept="image/*" onchange="capP(this,'gashorno','reloj')">
           <div class="pico">📷</div>
           <div class="phi">Foto</div>
           <button class="prm" onclick="remP(event,'gashorno','reloj')">✕</button>
@@ -1775,7 +1775,7 @@ header{background:var(--s1);border-bottom:2px solid var(--accent);padding:0 14px
       <div style="margin-top:10px;">
         <div class="pi"><div class="pl">Foto a subir</div>
           <div class="pc" id="adj-foto-cont">
-            <input type="file" accept="image/*" capture="environment" id="adj-foto-input" onchange="adjCapturarFoto(this)">
+            <input type="file" accept="image/*" id="adj-foto-input" onchange="adjCapturarFoto(this)">
             <div class="pico">📷</div>
             <div class="phi">Tocar para seleccionar</div>
             <button class="prm" onclick="adjRemoveFoto(event)" style="display:none;" id="adj-foto-rm">✕</button>
@@ -2083,10 +2083,10 @@ let pendingQueue=[];
 // Cuando publiques una nueva versión, incrementa este número
 // y también el número en el archivo version.json del repo.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = '4.44';
+const APP_VERSION = '4.45';
 
 // URL del script de Apps Script
-const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbwUxMjyBng1dY9pdIyQpf2PLb2h9au851V9J69RxAcvC2qTO2ls15kbrpPJ8D_6JAh6mA/exec';
+const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxx2S1lpVQZ2usUsK2xFxNczOcrrK8cU1XFv-Op3541vKgYcFCxlF9-ZPIzYGePSPLshQ/exec';
 
 let SCRIPT_URL = SCRIPT_URL_DEFAULT;
 const ML={M:'Mañana',T:'Tarde',N:'Noche'}, MI={M:'🌅',T:'☀️',N:'🌙'};
@@ -2877,6 +2877,35 @@ function clearPC(cid){
   var fi=c.querySelector('input[type="file"]');if(fi)fi.value='';
 }
 
+// ═══════════════ FORMATO DECIMAL CON COMA ═══════════════
+// Los contadores usan coma como separador decimal (formato chileno).
+// Permite escribir: dígitos, punto (miles opcional) y una única coma decimal.
+// Bloquea caracteres inválidos y auto-formatea al perder foco.
+function formatDecimalComa(input){
+  var v = input.value;
+  // Solo permitir: dígitos, punto (miles), coma (decimal), signo menos al inicio
+  var limpio = v.replace(/[^0-9.,\-]/g, '');
+  // Solo puede haber una sola coma decimal
+  var partes = limpio.split(',');
+  if(partes.length > 2){
+    limpio = partes[0] + ',' + partes.slice(1).join('');
+  }
+  // El signo menos solo al inicio
+  limpio = limpio.replace(/(?!^)-/g, '');
+  if(v !== limpio) input.value = limpio;
+}
+
+// Convierte un texto con formato chileno (coma decimal, punto miles) a Number
+// Ej: "1.234,56" → 1234.56 ; "8600" → 8600 ; "8,5" → 8.5
+function parseComaDecimal(txt){
+  if(txt === null || txt === undefined || txt === '') return null;
+  var s = String(txt).trim();
+  // Quitar puntos (separador miles) y cambiar coma por punto
+  s = s.replace(/\./g, '').replace(',', '.');
+  var n = parseFloat(s);
+  return isNaN(n) ? null : n;
+}
+
 // ═══════════════ GUARDAR FOTOS EN GALERÍA (Android) ═══════════════
 // Fuerza descarga con nombre estructurado. Android agrupa por carpeta simulada.
 // iOS: abre en nueva pestaña para que el usuario guarde manualmente.
@@ -3085,8 +3114,12 @@ async function submitMed(mod){
   }
 
   if(mod==='isla'){
+    // Convertir contadores de formato chileno (coma) a numérico estándar (punto)
+    var cntD = parseComaDecimal(gv('i-cnt-d'));
+    var cntG = parseComaDecimal(gv('i-cnt-g'));
     data={med:med,
-      cnt_diesel:gv('i-cnt-d'),cnt_gasolina:gv('i-cnt-g'),
+      cnt_diesel: cntD !== null ? cntD : gv('i-cnt-d'),
+      cnt_gasolina: cntG !== null ? cntG : gv('i-cnt-g'),
       med_diesel:gv('i-med-d'),med_gasolina:gv('i-med-g'),
       op_surtidores:toggles['is']||'',op_orpak:toggles['io']||'',
       obs:gv('i-obs')};
